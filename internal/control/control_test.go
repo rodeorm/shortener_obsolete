@@ -11,7 +11,7 @@ import (
 	"github.com/rodeorm/shortener/internal/repo"
 )
 
-func TestDecoratedHandler_RootURLHandler(t *testing.T) {
+func TestDecoratedHandler(t *testing.T) {
 	type want struct {
 		statusCode  int
 		contentType string
@@ -29,15 +29,15 @@ func TestDecoratedHandler_RootURLHandler(t *testing.T) {
 			handler: DecoratedHandler{DomainName: "http://localhost:8080", Storage: repo.NewStorage()},
 			method:  "GET",
 			request: "http://localhost:8080/10",
-			want:    want{statusCode: 400, contentType: ""},
+			want:    want{statusCode: 400},
 		},
 		{
 			//Эндпоинт POST / принимает в теле запроса строку URL для сокращения и возвращает ответ с кодом 201 и сокращённым URL в виде текстовой строки в теле.
-			name:    "Проверка обработки корректных POST запросов",
+			name:    "Проверка обработки некорректных POST запросов",
 			handler: DecoratedHandler{DomainName: "http://localhost:8080", Storage: repo.NewStorage()},
 			method:  "POST",
 			request: "http://localhost:8080",
-			want:    want{statusCode: 201},
+			want:    want{statusCode: 400},
 		},
 		{
 			//Нужно учесть некорректные запросы и возвращать для них ответ с кодом 400 (любые кроме GET и POST)
