@@ -5,15 +5,18 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/rodeorm/shortener/internal/repo"
 )
 
 /*
 Сервер должен быть доступен по адресу: http://localhost:8080.
 */
-func RouterStart(handler *DecoratedHandler) error {
+func RouterStart(h *DecoratedHandler) error {
 
 	r := mux.NewRouter()
-	r.Methods("GET", "POST").Handler(http.HandlerFunc(handler.returnURLHandler))
+	r.HandleFunc("/", h.RootHandler).Methods(http.MethodPost)
+	r.HandleFunc("/{URL}", h.RootURLHandler).Methods(http.MethodGet)
+	r.HandleFunc("/api/shorten", h.ApiShortenHandler).Methods(http.MethodPost)
 
 	err := http.ListenAndServe(":8080", r) // Не используем имя домена, всегда запускаем локально
 	if err != nil {
@@ -22,4 +25,9 @@ func RouterStart(handler *DecoratedHandler) error {
 	}
 
 	return nil
+}
+
+type DecoratedHandler struct {
+	DomainName string
+	Storage    *repo.Storage
 }

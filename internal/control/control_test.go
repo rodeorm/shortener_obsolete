@@ -5,12 +5,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/rodeorm/shortener/internal/repo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/rodeorm/shortener/internal/repo"
 )
 
-func TestDecoratedHandler_returnURLHandler(t *testing.T) {
+func TestDecoratedHandler_RootURLHandler(t *testing.T) {
 	type want struct {
 		statusCode  int
 		contentType string
@@ -24,7 +25,7 @@ func TestDecoratedHandler_returnURLHandler(t *testing.T) {
 	}{
 		{
 			//Эндпоинт GET /{id} принимает в качестве URL-параметра идентификатор сокращённого URL и возвращает ответ с кодом 307 и оригинальным URL в HTTP-заголовке Location.
-			name:    "Проверка обработки корректных GET запросов",
+			name:    "Проверка обработки корректных GET запросов (отсутствуют данные короткого url)",
 			handler: DecoratedHandler{DomainName: "http://localhost:8080", Storage: repo.NewStorage()},
 			method:  "GET",
 			request: "http://localhost:8080/10",
@@ -69,7 +70,7 @@ func TestDecoratedHandler_returnURLHandler(t *testing.T) {
 				request = httptest.NewRequest(http.MethodDelete, tt.request, nil)
 			}
 			w := httptest.NewRecorder()
-			h := http.HandlerFunc(tt.handler.returnURLHandler)
+			h := http.HandlerFunc(tt.handler.RootHandler)
 			h.ServeHTTP(w, request)
 			result := w.Result()
 			err := result.Body.Close()
