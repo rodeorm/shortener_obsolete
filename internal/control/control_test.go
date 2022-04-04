@@ -13,8 +13,8 @@ import (
 
 func TestDecoratedHandler(t *testing.T) {
 	type want struct {
-		statusCode  int
-		contentType string
+		statusCode int
+		//	contentType string
 	}
 	tests := []struct {
 		name    string

@@ -5,6 +5,6 @@ import (
 	"net/http"
 )
 
-func (h DecoratedHandler) ApiShortenHandler(w http.ResponseWriter, r *http.Request) {
+func (h DecoratedHandler) APIShortenHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Routing check.Hi from JSON URL")
 }
