@@ -32,12 +32,20 @@ func TestDecoratedHandler(t *testing.T) {
 			want:    want{statusCode: 400},
 		},
 		{
-			//Эндпоинт POST / принимает в теле запроса строку URL для сокращения и возвращает ответ с кодом 201 и сокращённым URL в виде текстовой строки в теле.
+			//Эндпоинт POST / принимает пусто тело запроса и возвращает ответ с кодом 400.
 			name:    "Проверка обработки некорректных POST запросов",
 			handler: DecoratedHandler{DomainName: "http://localhost:8080", Storage: repo.NewStorage()},
 			method:  "POST",
 			request: "http://localhost:8080",
 			want:    want{statusCode: 400},
+		},
+		{
+			//Эндпоинт POST / принимает в теле запроса строку URL для сокращения и возвращает ответ с кодом 201 и сокращённым URL в виде текстовой строки в теле.
+			name:    "Проверка обработки корректных POST запросов",
+			handler: DecoratedHandler{DomainName: "http://localhost:8080", Storage: repo.NewStorage()},
+			method:  "POST",
+			request: "http://localhost:8080",
+			want:    want{statusCode: 201},
 		},
 		{
 			//Нужно учесть некорректные запросы и возвращать для них ответ с кодом 400 (любые кроме GET и POST)
