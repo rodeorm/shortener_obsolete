@@ -13,8 +13,8 @@ import (
 
 func TestDecoratedHandler_RootURLHandler(t *testing.T) {
 	type want struct {
-		statusCode int
-		//	contentType string
+		statusCode  int
+		contentType string
 	}
 	tests := []struct {
 		name    string
@@ -22,6 +22,7 @@ func TestDecoratedHandler_RootURLHandler(t *testing.T) {
 		method  string
 		want    want
 		request string
+		body    []byte
 	}{
 		{
 			//Эндпоинт GET /{id} принимает в качестве URL-параметра идентификатор сокращённого URL и возвращает ответ с кодом 307 и оригинальным URL в HTTP-заголовке Location.
@@ -54,6 +55,14 @@ func TestDecoratedHandler_RootURLHandler(t *testing.T) {
 			method:  "DELETE",
 			request: "http://localhost:8080",
 			want:    want{statusCode: 400},
+		},
+		{
+			//Нужно принимать и возвращать JSON
+			name:    "Проверка обработки некорректных запросов: DELETE",
+			handler: DecoratedHandler{DomainName: "http://localhost:8080", Storage: repo.NewStorage()},
+			method:  "POST (JSON)",
+			request: "http://localhost:8080/api/shorten",
+			want:    want{statusCode: 400, contentType: "json"},
 		},
 	}
 	for _, tt := range tests {
