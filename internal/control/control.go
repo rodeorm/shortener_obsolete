@@ -16,6 +16,7 @@ func RouterStart(h *DecoratedHandler) error {
 	r := mux.NewRouter()
 	r.HandleFunc("/", h.RootHandler).Methods(http.MethodPost)
 	r.HandleFunc("/{URL}", h.RootURLHandler).Methods(http.MethodGet)
+
 	r.HandleFunc("/api/shorten", h.APIShortenHandler).Methods(http.MethodPost)
 	r.HandleFunc("/", h.BadRequestHandler)
 
