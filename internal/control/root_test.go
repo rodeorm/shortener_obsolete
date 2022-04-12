@@ -28,7 +28,7 @@ func TestRootHandlers(t *testing.T) {
 		{
 			//Эндпоинт GET /{id} принимает в качестве URL-параметра идентификатор сокращённого URL и возвращает ответ с кодом 307 и оригинальным URL в HTTP-заголовке Location.
 			name:    "Проверка обработки корректных GET запросов (отсутствуют данные короткого url)",
-			handler: DecoratedHandler{DomainName: "http://localhost:8080", Storage: repo.NewStorage()},
+			handler: DecoratedHandler{ServerAddress: "http://localhost:8080", Storage: repo.NewStorage()},
 			method:  "GET",
 			request: "http://localhost:8080/10",
 			want:    want{statusCode: 400},
@@ -36,7 +36,7 @@ func TestRootHandlers(t *testing.T) {
 		{
 			//Эндпоинт POST / принимает в теле запроса строку URL для сокращения и возвращает ответ с кодом 201 и сокращённым URL в виде текстовой строки в теле.
 			name:    "Проверка обработки некорректных POST запросов",
-			handler: DecoratedHandler{DomainName: "http://localhost:8080", Storage: repo.NewStorage()},
+			handler: DecoratedHandler{ServerAddress: "http://localhost:8080", Storage: repo.NewStorage()},
 			method:  "POST",
 			request: "http://localhost:8080",
 			want:    want{statusCode: 400},
@@ -44,7 +44,7 @@ func TestRootHandlers(t *testing.T) {
 		{
 			//Эндпоинт POST / принимает в теле запроса строку URL для сокращения и возвращает ответ с кодом 201 и сокращённым URL в виде текстовой строки в теле.
 			name:    "Проверка обработки корректных POST запросов",
-			handler: DecoratedHandler{DomainName: "http://localhost:8080", Storage: repo.NewStorage()},
+			handler: DecoratedHandler{ServerAddress: "http://localhost:8080", Storage: repo.NewStorage()},
 			method:  "POST",
 			body:    "http://www.yandex.ru",
 			request: "http://localhost:8080",
@@ -53,7 +53,7 @@ func TestRootHandlers(t *testing.T) {
 		{
 			//Нужно учесть некорректные запросы и возвращать для них ответ с кодом 400 (любые кроме GET и POST)
 			name:    "Проверка обработки некорректных запросов: PUT",
-			handler: DecoratedHandler{DomainName: "http://localhost:8080", Storage: repo.NewStorage()},
+			handler: DecoratedHandler{ServerAddress: "http://localhost:8080", Storage: repo.NewStorage()},
 			method:  "PUT",
 			request: "http://localhost:8080",
 			want:    want{statusCode: 400},
@@ -61,7 +61,7 @@ func TestRootHandlers(t *testing.T) {
 		{
 			//Нужно учесть некорректные запросы и возвращать для них ответ с кодом 400 (любые кроме GET и POST)
 			name:    "Проверка обработки некорректных запросов: DELETE",
-			handler: DecoratedHandler{DomainName: "http://localhost:8080", Storage: repo.NewStorage()},
+			handler: DecoratedHandler{ServerAddress: "http://localhost:8080", Storage: repo.NewStorage()},
 			method:  "DELETE",
 			request: "http://localhost:8080",
 			want:    want{statusCode: 400},

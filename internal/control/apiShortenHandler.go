@@ -23,11 +23,10 @@ func (h DecoratedHandler) APIShortenHandler(w http.ResponseWriter, r *http.Reque
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	fmt.Println("Тело POST запроса. Оригинальный URL:", url.Value)
 	shortURLKey, _ := h.Storage.InsertShortURL(url.Value)
 	w.Header().Set("Content-Type", "json")
 	shortURL := logic.ShortenURL{}
-	shortURL.Value = h.DomainName + "/" + shortURLKey
+	shortURL.Value = h.BaseURL + "/" + shortURLKey
 	w.WriteHeader(http.StatusCreated)
 	bodyBytes, err = json.Marshal(shortURL)
 	if err != nil {
