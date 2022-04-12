@@ -24,9 +24,9 @@ func main() {
 //Config выполняет первоначальную конфигурацию
 func config() *control.DecoratedHandler {
 
-	os.Setenv("SERVER_ADDRESS", "http://localhost:8080")
-	os.Setenv("BASE_URL", "http://tiny")
-	//os.Setenv("FILE_STORAGE_PATH", "D:/)
+	//	os.Setenv("SERVER_ADDRESS", "http://localhost:8080")
+	//	os.Setenv("BASE_URL", "http://tiny")
+	//	os.Setenv("FILE_STORAGE_PATH", "D:/")
 
 	//Адрес запуска HTTP-сервера с помощью переменной SERVER_ADDRESS
 	sa := os.Getenv("SERVER_ADDRESS")
