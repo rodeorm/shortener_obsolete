@@ -21,11 +21,12 @@ func main() {
 	control.RouterStart(handler)
 }
 
-//Config выполняет первоначальную конфигурацию сервиса и возвращает - имя домена, соответствие  ключа к оригинальному URL
+//Config выполняет первоначальную конфигурацию
 func config() *control.DecoratedHandler {
 
-	//os.Setenv("SERVER_ADDRESS", "http://localhost:8080")
-	//os.Setenv("BASE_URL", "http://tiny")
+	os.Setenv("SERVER_ADDRESS", "http://localhost:8080")
+	os.Setenv("BASE_URL", "http://tiny")
+	//os.Setenv("FILE_STORAGE_PATH", "D:/)
 
 	//Адрес запуска HTTP-сервера с помощью переменной SERVER_ADDRESS
 	sa := os.Getenv("SERVER_ADDRESS")
@@ -39,6 +40,11 @@ func config() *control.DecoratedHandler {
 		fmt.Println("Не найдена переменная среды BASE_URL")
 		bu = "http://localhost:8080"
 	}
+
+	//Путь до файла должен передаваться в переменной окружения FILE_STORAGE_PATH.
+	fsp := os.Getenv("FILE_STORAGE_PATH")
+
 	fmt.Println("Адрес запуска http сервера: ", sa, ". Базовый адрес результирующего url: ", bu)
-	return &control.DecoratedHandler{ServerAddress: sa, Storage: repo.NewStorage(), BaseURL: bu}
+
+	return &control.DecoratedHandler{ServerAddress: sa, Storage: repo.NewStorage(fsp), BaseURL: bu}
 }

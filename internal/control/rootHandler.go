@@ -15,7 +15,7 @@ func (h DecoratedHandler) RootHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	shortURLKey, _ := h.Storage.InsertShortURL(bodyString)
+	shortURLKey, _ := h.Storage.InsertShortURL(logic.GetClearURL(bodyString, h.BaseURL))
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprintf(w, h.BaseURL+"/"+shortURLKey)

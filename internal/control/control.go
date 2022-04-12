@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/rodeorm/shortener/internal/repo"
+	repo "github.com/rodeorm/shortener/internal/repo"
 )
 
 /*
@@ -37,5 +37,5 @@ func RouterStart(h *DecoratedHandler) error {
 type DecoratedHandler struct {
 	ServerAddress string
 	BaseURL       string
-	Storage       *repo.Storage
+	Storage       repo.AbstractStorage
 }

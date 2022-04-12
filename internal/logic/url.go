@@ -12,9 +12,8 @@ type ShortenURL struct {
 	Value string `json:"result,omitempty"`
 }
 
-//Обработка поступившего URL (пока только делает его строчным)
-func GetClearURL(s string) string {
+//GetClearURL делает URL строчным, убирает наименование домена
+func GetClearURL(s string, d string) string {
 	s = strings.ToLower(s)
-
-	return s
+	return strings.Replace(s, d, "", 1)
 }
