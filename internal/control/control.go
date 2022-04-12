@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+
 	repo "github.com/rodeorm/shortener/internal/repo"
 )
 
@@ -15,7 +16,6 @@ import (
 func RouterStart(h *DecoratedHandler) error {
 
 	r := mux.NewRouter()
-	r.Host(h.ServerAddress)
 	r.HandleFunc("/", h.RootHandler).Methods(http.MethodPost)
 	r.HandleFunc("/{URL}", h.RootURLHandler).Methods(http.MethodGet)
 
@@ -24,13 +24,11 @@ func RouterStart(h *DecoratedHandler) error {
 
 	srv := &http.Server{
 		Handler:      r,
-		Addr:         "localhost:8080",
+		Addr:         h.ServerAddress,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
-
 	log.Fatal(srv.ListenAndServe())
-
 	return nil
 }
 

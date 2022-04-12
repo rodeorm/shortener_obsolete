@@ -24,20 +24,20 @@ func main() {
 //Config выполняет первоначальную конфигурацию
 func config() *control.DecoratedHandler {
 
-	//	os.Setenv("SERVER_ADDRESS", "http://localhost:8080")
+	//	os.Setenv("SERVER_ADDRESS", "localhost:8080")
 	//	os.Setenv("BASE_URL", "http://tiny")
 	//	os.Setenv("FILE_STORAGE_PATH", "D:/")
 
 	//Адрес запуска HTTP-сервера с помощью переменной SERVER_ADDRESS
 	sa := os.Getenv("SERVER_ADDRESS")
 	if sa == "" {
-		fmt.Println("Не найдена переменная среды SERVER_ADDRESS")
-		sa = "http://localhost:8080"
+		//		fmt.Println("Не найдена переменная среды SERVER_ADDRESS")
+		sa = "localhost:8080"
 	}
 	//Базовый адрес результирующего сокращённого URL с помощью переменной BASE_URL.
 	bu := os.Getenv("BASE_URL")
 	if bu == "" {
-		fmt.Println("Не найдена переменная среды BASE_URL")
+		//	fmt.Println("Не найдена переменная среды BASE_URL")
 		bu = "http://localhost:8080"
 	}
 
