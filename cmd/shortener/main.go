@@ -26,7 +26,7 @@ func config() *control.DecoratedHandler {
 
 	//	os.Setenv("SERVER_ADDRESS", "localhost:8080")
 	//	os.Setenv("BASE_URL", "http://tiny")
-	os.Setenv("FILE_STORAGE_PATH", "D:/file.txt")
+	//  os.Setenv("FILE_STORAGE_PATH", "D:/file.txt  nn")
 
 	//Адрес запуска HTTP-сервера с помощью переменной SERVER_ADDRESS
 	sa := os.Getenv("SERVER_ADDRESS")
