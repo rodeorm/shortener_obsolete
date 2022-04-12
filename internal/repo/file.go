@@ -1,15 +1,35 @@
 package repo
 
 import (
+	"bufio"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/rodeorm/shortener/internal/logic"
 )
 
 type fileStorage struct {
-	filePath        string
-	originalToShort map[string]string
-	shortToOriginal map[string]string
+	filePath string
+}
+
+func (s fileStorage) CheckFile() error {
+	fileInfo, err := os.Stat(s.filePath)
+
+	if errors.Is(err, os.ErrNotExist) {
+		newFile, err := os.Create(s.filePath)
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+		newFile.Close()
+		fmt.Println("Создан файл: ", newFile.Name())
+		return nil
+	}
+	fmt.Println("Файл уже есть: ", fileInfo.Name())
+	return nil
 }
 
 // InsertShortURL принимает оригинальный URL, генерирует для него ключ и сохраняет соответствие оригинального URL и ключа (либо возвращает ранее созданный ключ)
@@ -21,26 +41,59 @@ func (s fileStorage) InsertShortURL(URL string) (string, error) {
 	}
 	key, _ = logic.ReturnShortKey(5)
 
-	return key, nil
+	f, err := os.OpenFile(s.filePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0777)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+	pair := logic.URLPair{Origin: URL, Short: key}
+	data, err := json.Marshal(pair)
+	if err != nil {
+		return "", err
+	}
+	data = append(data, '\n')
+	_, err = f.Write(data)
+	return key, err
+}
 
+func (s fileStorage) getShortlURLFromFile(URL string) (string, bool) {
+
+	file, err := os.Open(s.filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	var up logic.URLPair
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		json.Unmarshal(scanner.Bytes(), &up)
+		if up.Origin == URL {
+			return up.Short, true
+		}
+	}
+
+	return "", false
 }
 
 // SelectOriginalURL принимает на вход короткий URL (относительный, без имени домена), извлекает из него ключ и возвращает оригинальный URL из хранилища
 func (s fileStorage) SelectOriginalURL(shortURL string) (string, bool, error) {
-	fmt.Println("Короткий ключ для поиска URL: ", shortURL)
-	fmt.Println(s.shortToOriginal)
-	value, isExist := s.shortToOriginal[shortURL]
-	return value, isExist, nil
-}
 
-func (s fileStorage) getOriginalURLFromFile(ShortURL string) (string, bool) {
-	return "", false
-}
+	file, err := os.Open(s.filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
 
-func (s fileStorage) getShortlURLFromFile(originalURL string) (string, bool) {
-	return "", false
-}
+	var up logic.URLPair
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		json.Unmarshal(scanner.Bytes(), &up)
+		if up.Short == shortURL {
+			return up.Origin, true, nil
+		}
+	}
 
-func (s fileStorage) addPairToFile(originalURL string, shortURL string) (string, error) {
-	return "", nil
+	return "", false, err
+
 }

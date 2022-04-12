@@ -9,13 +9,14 @@ type AbstractStorage interface {
 
 func NewStorage(filePath string) AbstractStorage {
 	container.Singleton(func() AbstractStorage {
-		ots := make(map[string]string)
-		sto := make(map[string]string)
+
 		if filePath != "" {
-			storage := fileStorage{originalToShort: ots, shortToOriginal: sto, filePath: filePath}
+			storage := fileStorage{filePath: filePath}
+			storage.CheckFile()
 			return &storage
 		}
-
+		ots := make(map[string]string)
+		sto := make(map[string]string)
 		storage := memoryStorage{originalToShort: ots, shortToOriginal: sto}
 		return &storage
 

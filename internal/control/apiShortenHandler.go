@@ -19,15 +19,15 @@ func (h DecoratedHandler) APIShortenHandler(w http.ResponseWriter, r *http.Reque
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if !logic.CheckURLValidity(url.Value) {
+	if !logic.CheckURLValidity(url.Key) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	url.Value = logic.GetClearURL(url.Value, h.BaseURL)
-	shortURLKey, _ := h.Storage.InsertShortURL(url.Value)
+	url.Key = logic.GetClearURL(url.Key, h.BaseURL)
+	shortURLKey, _ := h.Storage.InsertShortURL(url.Key)
 	w.Header().Set("Content-Type", "application/json")
 	shortURL := logic.ShortenURL{}
-	shortURL.Value = h.BaseURL + "/" + shortURLKey
+	shortURL.Key = h.BaseURL + "/" + shortURLKey
 	w.WriteHeader(http.StatusCreated)
 	bodyBytes, err = json.Marshal(shortURL)
 	if err != nil {

@@ -5,11 +5,16 @@ import (
 )
 
 type URL struct {
-	Value string `json:"url,omitempty"`
+	Key string `json:"url,omitempty"`
 }
 
 type ShortenURL struct {
-	Value string `json:"result,omitempty"`
+	Key string `json:"result,omitempty"`
+}
+
+type URLPair struct {
+	Origin string `json:"origin,omitempty"`
+	Short  string `json:"short,omitempty"`
 }
 
 //GetClearURL делает URL строчным, убирает наименование домена
