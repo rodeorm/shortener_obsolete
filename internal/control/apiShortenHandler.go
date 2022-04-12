@@ -25,7 +25,7 @@ func (h DecoratedHandler) APIShortenHandler(w http.ResponseWriter, r *http.Reque
 	}
 	url.Value = logic.GetClearURL(url.Value, h.BaseURL)
 	shortURLKey, _ := h.Storage.InsertShortURL(url.Value)
-	w.Header().Set("Content-Type", "json")
+	w.Header().Set("Content-Type", "application/json")
 	shortURL := logic.ShortenURL{}
 	shortURL.Value = h.BaseURL + "/" + shortURLKey
 	w.WriteHeader(http.StatusCreated)
