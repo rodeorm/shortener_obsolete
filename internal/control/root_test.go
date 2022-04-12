@@ -1,6 +1,7 @@
 package control
 
 import (
+	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -11,10 +12,9 @@ import (
 	"github.com/rodeorm/shortener/internal/repo"
 )
 
-func TestDecoratedHandler_RootURLHandler(t *testing.T) {
+func TestRootHandlers(t *testing.T) {
 	type want struct {
-		statusCode  int
-		contentType string
+		statusCode int
 	}
 	tests := []struct {
 		name    string
@@ -22,8 +22,9 @@ func TestDecoratedHandler_RootURLHandler(t *testing.T) {
 		method  string
 		want    want
 		request string
-		body    []byte
+		body    string
 	}{
+
 		{
 			//Эндпоинт GET /{id} принимает в качестве URL-параметра идентификатор сокращённого URL и возвращает ответ с кодом 307 и оригинальным URL в HTTP-заголовке Location.
 			name:    "Проверка обработки корректных GET запросов (отсутствуют данные короткого url)",
@@ -41,6 +42,15 @@ func TestDecoratedHandler_RootURLHandler(t *testing.T) {
 			want:    want{statusCode: 400},
 		},
 		{
+			//Эндпоинт POST / принимает в теле запроса строку URL для сокращения и возвращает ответ с кодом 201 и сокращённым URL в виде текстовой строки в теле.
+			name:    "Проверка обработки корректных POST запросов",
+			handler: DecoratedHandler{DomainName: "http://localhost:8080", Storage: repo.NewStorage()},
+			method:  "POST",
+			body:    "http://www.yandex.ru",
+			request: "http://localhost:8080",
+			want:    want{statusCode: 201},
+		},
+		{
 			//Нужно учесть некорректные запросы и возвращать для них ответ с кодом 400 (любые кроме GET и POST)
 			name:    "Проверка обработки некорректных запросов: PUT",
 			handler: DecoratedHandler{DomainName: "http://localhost:8080", Storage: repo.NewStorage()},
@@ -56,21 +66,18 @@ func TestDecoratedHandler_RootURLHandler(t *testing.T) {
 			request: "http://localhost:8080",
 			want:    want{statusCode: 400},
 		},
-		{
-			//Нужно принимать и возвращать JSON
-			name:    "Проверка обработки некорректных запросов: DELETE",
-			handler: DecoratedHandler{DomainName: "http://localhost:8080", Storage: repo.NewStorage()},
-			method:  "POST (JSON)",
-			request: "http://localhost:8080/api/shorten",
-			want:    want{statusCode: 400, contentType: "json"},
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var request *http.Request
 			switch tt.method {
 			case "POST":
-				request = httptest.NewRequest(http.MethodPost, tt.request, nil)
+				if tt.body != "" {
+					request = httptest.NewRequest(http.MethodPost, tt.request, bytes.NewReader([]byte(tt.body)))
+
+				} else {
+					request = httptest.NewRequest(http.MethodPost, tt.request, nil)
+				}
 			case "GET":
 				request = httptest.NewRequest(http.MethodGet, tt.request, nil)
 			case "PUT":
