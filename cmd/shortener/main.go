@@ -42,7 +42,7 @@ func config() *control.DecoratedHandler {
 	}
 
 	//Путь до файла должен передаваться в переменной окружения FILE_STORAGE_PATH.
-	fsp := os.Getenv("FILE_STORAGE_PATH")
+	fsp := "" //os.Getenv("FILE_STORAGE_PATH")
 
 	fmt.Println("Адрес запуска http сервера: ", sa, ". Базовый адрес результирующего url: ", bu)
 
