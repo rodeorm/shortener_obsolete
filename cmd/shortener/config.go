@@ -8,7 +8,7 @@ import (
 	"github.com/rodeorm/shortener/internal/repo"
 )
 
-//Config выполняет первоначальную конфигурацию
+//config выполняет первоначальную конфигурацию
 func config() *control.DecoratedHandler {
 	flag.Parse()
 	//	os.Setenv("SERVER_ADDRESS", "localhost:8080")
@@ -16,7 +16,8 @@ func config() *control.DecoratedHandler {
 	//  os.Setenv("FILE_STORAGE_PATH", "D:/file.txt  nn")
 	var sa, bu, fsp string
 
-	//Адрес запуска HTTP-сервера с помощью переменной SERVER_ADDRESS
+	// fmt.Println("flags", *a, *b, *f)
+	//Адрес запуска HTTP-сервера
 	if *a == "" {
 		sa = os.Getenv("SERVER_ADDRESS")
 		if sa == "" {
@@ -26,18 +27,17 @@ func config() *control.DecoratedHandler {
 		sa = *a
 	}
 
-	//Базовый адрес результирующего сокращённого URL с помощью переменной BASE_URL.
+	//Базовый адрес результирующего сокращённого URL
 	if *b == "" {
 		bu = os.Getenv("BASE_URL")
 		if bu == "" {
-
 			bu = "http://localhost:8080"
-		} else {
-			bu = *b
 		}
+	} else {
+		bu = *b
 	}
 
-	//Путь до файла должен передаваться в переменной окружения FILE_STORAGE_PATH.
+	//Путь до файла
 	if *f == "" {
 		fsp = os.Getenv("FILE_STORAGE_PATH")
 	} else {

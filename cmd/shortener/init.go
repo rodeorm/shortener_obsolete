@@ -15,5 +15,4 @@ func init() {
 	b = flag.String("b", "", "BASE_URL")
 	//флаг -f, отвечающий за путь до файла с сокращёнными URL (переменная FILE_STORAGE_PATH)
 	f = flag.String("f", "", "FILE_STORAGE_PATH")
-
 }

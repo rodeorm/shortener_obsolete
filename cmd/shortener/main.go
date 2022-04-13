@@ -1,8 +1,6 @@
 package main
 
-import (
-	"github.com/rodeorm/shortener/internal/control"
-)
+import "github.com/rodeorm/shortener/internal/control"
 
 /*
 Сервис для сокращения длинных URL. Требования:
