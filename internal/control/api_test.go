@@ -35,6 +35,15 @@ func TestAPIHandlers(t *testing.T) {
 			request: "http://localhost:8080/api/shorten",
 			want:    want{statusCode: 201, contentType: "json"},
 		},
+		{
+			//Нужно принимать и возвращать JSON
+			name:    "Проверка обработки некорректных запросов: POST (json)",
+			handler: DecoratedHandler{ServerAddress: "http://localhost:8080", Storage: repo.NewStorage("")},
+			method:  "POST",
+			body:    ``,
+			request: "http://localhost:8080/api/shorten",
+			want:    want{statusCode: 400},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

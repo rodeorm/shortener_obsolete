@@ -10,9 +10,7 @@ import (
 	repo "github.com/rodeorm/shortener/internal/repo"
 )
 
-/*
-Сервер должен быть доступен по адресу: http://localhost:8080.
-*/
+//RouterStart запускает веб-сервер
 func RouterStart(h *DecoratedHandler) error {
 
 	r := mux.NewRouter()
