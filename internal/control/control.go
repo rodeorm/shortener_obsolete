@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 
+	middleware "github.com/rodeorm/shortener/internal/control/middleware"
 	repo "github.com/rodeorm/shortener/internal/repo"
 )
 
@@ -19,7 +20,7 @@ func RouterStart(h *DecoratedHandler) error {
 
 	r.HandleFunc("/api/shorten", h.APIShortenHandler).Methods(http.MethodPost)
 	r.HandleFunc("/", h.BadRequestHandler)
-
+	r.Use(middleware.GzipMiddleware)
 	srv := &http.Server{
 		Handler:      r,
 		Addr:         h.ServerAddress,
