@@ -10,6 +10,9 @@ import (
 
 func (h DecoratedHandler) RootHandler(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, _ := ioutil.ReadAll(r.Body)
+	if IsGzip(r.Header) {
+		bodyBytes, _ = DecompressGzip(bodyBytes)
+	}
 	bodyString := string(bodyBytes)
 	if !logic.CheckURLValidity(bodyString) {
 		w.WriteHeader(http.StatusBadRequest)
