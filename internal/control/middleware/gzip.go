@@ -1,8 +1,11 @@
 package middleware
 
 import (
+	"bytes"
 	"compress/gzip"
+	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -22,6 +25,13 @@ func GzipMiddleware(next http.Handler) http.Handler {
 		}
 		defer gz.Close()
 
+		bodyBytes, _ := ioutil.ReadAll(r.Body)
+		if IsGzip(r.Header) {
+			bodyBytes, _ = DecompressGzip(bodyBytes)
+		}
+
+		r.Body = ioutil.NopCloser(strings.NewReader(string(bodyBytes)))
+
 		w.Header().Set("Content-Encoding", "gzip")
 		next.ServeHTTP(gzipWriter{ResponseWriter: w, Writer: gz}, r)
 	})
@@ -34,4 +44,29 @@ type gzipWriter struct {
 
 func (w gzipWriter) Write(b []byte) (int, error) {
 	return w.Writer.Write(b)
+}
+
+func DecompressGzip(data []byte) ([]byte, error) {
+	r, err := gzip.NewReader(bytes.NewReader(data))
+	if err != nil {
+		return nil, fmt.Errorf("ошибка при декомпрессии данных из gzip: %v", err)
+	}
+	defer r.Close()
+
+	var b bytes.Buffer
+	_, err = b.ReadFrom(r)
+	if err != nil {
+		return nil, fmt.Errorf("ошибка при декомпрессии данных из gzip: %v", err)
+	}
+
+	return b.Bytes(), nil
+}
+
+func IsGzip(headers map[string][]string) bool {
+	for _, value := range headers["Content-Encoding"] {
+		if value == "application/gzip" || value == "gzip" {
+			return true
+		}
+	}
+	return false
 }

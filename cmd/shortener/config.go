@@ -14,35 +14,35 @@ func config() *control.DecoratedHandler {
 	//	os.Setenv("SERVER_ADDRESS", "localhost:8080")
 	//	os.Setenv("BASE_URL", "http://tiny")
 	//  os.Setenv("FILE_STORAGE_PATH", "D:/file.txt  nn")
-	var sa, bu, fsp string
+	var serverAddress, baseURL, fileStoragePath string
 
 	// fmt.Println("flags", *a, *b, *f)
 	//Адрес запуска HTTP-сервера
 	if *a == "" {
-		sa = os.Getenv("SERVER_ADDRESS")
-		if sa == "" {
-			sa = "localhost:8080"
+		serverAddress = os.Getenv("SERVER_ADDRESS")
+		if serverAddress == "" {
+			serverAddress = "localhost:8080"
 		}
 	} else {
-		sa = *a
+		serverAddress = *a
 	}
 
 	//Базовый адрес результирующего сокращённого URL
 	if *b == "" {
-		bu = os.Getenv("BASE_URL")
-		if bu == "" {
-			bu = "http://localhost:8080"
+		baseURL = os.Getenv("BASE_URL")
+		if baseURL == "" {
+			baseURL = "http://localhost:8080"
 		}
 	} else {
-		bu = *b
+		baseURL = *b
 	}
 
 	//Путь до файла
 	if *f == "" {
-		fsp = os.Getenv("FILE_STORAGE_PATH")
+		fileStoragePath = os.Getenv("FILE_STORAGE_PATH")
 	} else {
-		fsp = *f
+		fileStoragePath = *f
 	}
 
-	return &control.DecoratedHandler{ServerAddress: sa, Storage: repo.NewStorage(fsp), BaseURL: bu}
+	return &control.DecoratedHandler{ServerAddress: serverAddress, Storage: repo.NewStorage(fileStoragePath), BaseURL: baseURL}
 }

@@ -35,6 +35,10 @@ func (s fileStorage) CheckFile() error {
 // InsertShortURL принимает оригинальный URL, генерирует для него ключ и сохраняет соответствие оригинального URL и ключа (либо возвращает ранее созданный ключ)
 func (s fileStorage) InsertShortURL(URL string) (string, error) {
 
+	if !logic.CheckURLValidity(URL) {
+		return "", fmt.Errorf("невалидный URL: %s", URL)
+	}
+	URL = logic.GetClearURL(URL, "")
 	key, isExist := s.getShortlURLFromFile(URL)
 	if isExist {
 		return key, nil
@@ -56,6 +60,7 @@ func (s fileStorage) InsertShortURL(URL string) (string, error) {
 	return key, err
 }
 
+//getShortlURLFromFile возвращает из файла сокращенный URL по оригинальному URL
 func (s fileStorage) getShortlURLFromFile(URL string) (string, bool) {
 
 	file, err := os.Open(s.filePath)
