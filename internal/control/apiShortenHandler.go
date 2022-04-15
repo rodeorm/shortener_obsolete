@@ -6,12 +6,12 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/rodeorm/shortener/internal/logic"
+	repo "github.com/rodeorm/shortener/internal/repo"
 )
 
 // APIShortenHandler принимает в теле запроса JSON-объект {"url":"<some_url>"} и возвращает в ответ объект {"result":"<shorten_url>"}.
 func (h DecoratedHandler) APIShortenHandler(w http.ResponseWriter, r *http.Request) {
-	url := logic.URL{}
+	url := repo.URL{}
 
 	bodyBytes, _ := ioutil.ReadAll(r.Body)
 	err := json.Unmarshal(bodyBytes, &url)
@@ -20,11 +20,6 @@ func (h DecoratedHandler) APIShortenHandler(w http.ResponseWriter, r *http.Reque
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if !logic.CheckURLValidity(url.Key) {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	shortURLKey, err := h.Storage.InsertShortURL(url.Key)
 	if err != nil {
 		fmt.Println(err)
@@ -32,7 +27,7 @@ func (h DecoratedHandler) APIShortenHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	shortURL := logic.ShortenURL{}
+	shortURL := repo.ShortenURL{}
 	shortURL.Key = h.BaseURL + "/" + shortURLKey
 	w.WriteHeader(http.StatusCreated)
 	bodyBytes, err = json.Marshal(shortURL)

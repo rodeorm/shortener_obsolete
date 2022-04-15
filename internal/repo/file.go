@@ -50,7 +50,7 @@ func (s fileStorage) InsertShortURL(URL string) (string, error) {
 		log.Fatal(err)
 	}
 	defer f.Close()
-	pair := logic.URLPair{Origin: URL, Short: key}
+	pair := URLPair{Origin: URL, Short: key}
 	data, err := json.Marshal(pair)
 	if err != nil {
 		return "", err
@@ -69,7 +69,7 @@ func (s fileStorage) getShortlURLFromFile(URL string) (string, bool) {
 	}
 	defer file.Close()
 
-	var up logic.URLPair
+	var up URLPair
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		json.Unmarshal(scanner.Bytes(), &up)
@@ -90,7 +90,7 @@ func (s fileStorage) SelectOriginalURL(shortURL string) (string, bool, error) {
 	}
 	defer file.Close()
 
-	var up logic.URLPair
+	var up URLPair
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		json.Unmarshal(scanner.Bytes(), &up)

@@ -17,3 +17,16 @@ func NewStorage(filePath string) AbstractStorage {
 	storage := memoryStorage{originalToShort: ots, shortToOriginal: sto}
 	return &storage
 }
+
+type URL struct {
+	Key string `json:"url,omitempty"`
+}
+
+type ShortenURL struct {
+	Key string `json:"result,omitempty"`
+}
+
+type URLPair struct {
+	Origin string `json:"origin,omitempty"`
+	Short  string `json:"short,omitempty"`
+}
