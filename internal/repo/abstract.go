@@ -1,6 +1,32 @@
 package repo
 
-type DB interface {
-	InsertShortURL(URL string) (string, error)
-	SelectOriginalURL(shortURL string) (string, bool, error)
+type AbstractStorage interface {
+	InsertShortURL(URL string) (string, error)               // Определяет соответствие между оригинальным и коротким адресом
+	SelectOriginalURL(shortURL string) (string, bool, error) // Возвращает оригинальный адрес на основании короткого
+}
+
+// NewStorage определяет место для хранения данных
+func NewStorage(filePath string) AbstractStorage {
+	if filePath != "" {
+		storage := fileStorage{filePath: filePath}
+		storage.CheckFile()
+		return &storage
+	}
+	ots := make(map[string]string)
+	sto := make(map[string]string)
+	storage := memoryStorage{originalToShort: ots, shortToOriginal: sto}
+	return &storage
+}
+
+type URL struct {
+	Key string `json:"url,omitempty"`
+}
+
+type ShortenURL struct {
+	Key string `json:"result,omitempty"`
+}
+
+type URLPair struct {
+	Origin string `json:"origin,omitempty"`
+	Short  string `json:"short,omitempty"`
 }

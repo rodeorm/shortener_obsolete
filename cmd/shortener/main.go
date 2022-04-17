@@ -1,9 +1,6 @@
 package main
 
-import (
-	"github.com/rodeorm/shortener/internal/control"
-	"github.com/rodeorm/shortener/internal/repo"
-)
+import "github.com/rodeorm/shortener/internal/control"
 
 /*
 Сервис для сокращения длинных URL. Требования:
@@ -16,9 +13,4 @@ import (
 func main() {
 	handler := config()
 	control.RouterStart(handler)
-}
-
-//Config выполняет первоначальную конфигурацию сервиса и возвращает - имя домена, соответствие  ключа к оригинальному URL
-func config() *control.DecoratedHandler {
-	return &control.DecoratedHandler{DomainName: "http://localhost:8080", Storage: repo.NewStorage()}
 }
