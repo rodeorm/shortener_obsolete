@@ -1,32 +1,32 @@
 package repo
 
 type AbstractStorage interface {
-	InsertShortURL(URL string) (string, error)               // Определяет соответствие между оригинальным и коротким адресом
+	InsertURL(URL, baseURL, userKey string) (string, error)  // Сохраняет соответствие между оригинальным и коротким адресом
 	SelectOriginalURL(shortURL string) (string, bool, error) // Возвращает оригинальный адрес на основании короткого
+	InsertUser(Key int) (*User, error)                       // Ищет существующего пользователя и возвращает его, если находит, если не находит то, сохраняет нового и возвращает его
+	SelectUserURLHistory(Key int) (*[]UserURLPair, error)    // Возвращает перечень соответствий между оригинальным и коротким адресом для конкретного пользователя
 }
 
 // NewStorage определяет место для хранения данных
 func NewStorage(filePath string) AbstractStorage {
 	if filePath != "" {
-		storage := fileStorage{filePath: filePath}
-		storage.CheckFile()
-		return &storage
+		return initFileStorage(filePath)
 	}
+	storage := initMemoryStorage()
+	return storage
+}
+
+func initMemoryStorage() *memoryStorage {
 	ots := make(map[string]string)
 	sto := make(map[string]string)
-	storage := memoryStorage{originalToShort: ots, shortToOriginal: sto}
+	usr := make(map[int]*User)
+	usrURL := make(map[int]*[]UserURLPair)
+	storage := memoryStorage{originalToShort: ots, shortToOriginal: sto, users: usr, userURLPairs: usrURL}
 	return &storage
 }
 
-type URL struct {
-	Key string `json:"url,omitempty"`
-}
-
-type ShortenURL struct {
-	Key string `json:"result,omitempty"`
-}
-
-type URLPair struct {
-	Origin string `json:"origin,omitempty"`
-	Short  string `json:"short,omitempty"`
+func initFileStorage(filePath string) *fileStorage {
+	storage := fileStorage{filePath: filePath}
+	storage.CheckFile(filePath)
+	return &storage
 }

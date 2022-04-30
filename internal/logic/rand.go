@@ -3,7 +3,6 @@ package logic
 import (
 	"fmt"
 	"math/rand"
-	"net/url"
 	"time"
 )
 
@@ -21,10 +20,4 @@ func ReturnShortKey(n int) (string, error) {
 		b[i] = letters[rand.Intn(len(letters))]
 	}
 	return string(b), nil
-}
-
-// CheckURLValidity проверяет URL на корректность
-func CheckURLValidity(u string) bool {
-	_, err := url.ParseRequestURI(u)
-	return err == nil
 }

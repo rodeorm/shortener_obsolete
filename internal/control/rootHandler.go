@@ -7,9 +7,13 @@ import (
 )
 
 func (h DecoratedHandler) RootHandler(w http.ResponseWriter, r *http.Request) {
+
+	w, userKey := h.GetUserIdentity(w, r)
+
 	bodyBytes, _ := ioutil.ReadAll(r.Body)
 	bodyString := string(bodyBytes)
-	shortURLKey, err := h.Storage.InsertShortURL(bodyString)
+	shortURLKey, err := h.Storage.InsertURL(bodyString, h.BaseURL, userKey)
+
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return

@@ -13,13 +13,15 @@ import (
 
 type fileStorage struct {
 	filePath string
+	//userFilePath     string
+	//userPairFilePath string
 }
 
-func (s fileStorage) CheckFile() error {
-	fileInfo, err := os.Stat(s.filePath)
+func (s fileStorage) CheckFile(filePath string) error {
+	fileInfo, err := os.Stat(filePath)
 
 	if errors.Is(err, os.ErrNotExist) {
-		newFile, err := os.Create(s.filePath)
+		newFile, err := os.Create(filePath)
 		if err != nil {
 			log.Fatal(err)
 			return err
@@ -33,7 +35,7 @@ func (s fileStorage) CheckFile() error {
 }
 
 // InsertShortURL принимает оригинальный URL, генерирует для него ключ и сохраняет соответствие оригинального URL и ключа (либо возвращает ранее созданный ключ)
-func (s fileStorage) InsertShortURL(URL string) (string, error) {
+func (s fileStorage) InsertURL(URL, domen, userKey string) (string, error) {
 
 	if !logic.CheckURLValidity(URL) {
 		return "", fmt.Errorf("невалидный URL: %s", URL)
@@ -101,4 +103,19 @@ func (s fileStorage) SelectOriginalURL(shortURL string) (string, bool, error) {
 
 	return "", false, err
 
+}
+
+func (s fileStorage) InsertUser(Key int) (*User, error) {
+	return nil, nil
+}
+
+func (s fileStorage) InsertUserURLPair(userKey int, origin, shorten string) error {
+	return nil
+}
+func (s fileStorage) SelectUserBySign(sign string) (*User, error) {
+	return nil, nil
+}
+
+func (s fileStorage) SelectUserURLHistory(Key int) (*[]UserURLPair, error) {
+	return nil, nil
 }
