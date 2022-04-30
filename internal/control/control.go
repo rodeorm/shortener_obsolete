@@ -16,10 +16,11 @@ func RouterStart(h *DecoratedHandler) error {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", h.RootHandler).Methods(http.MethodPost)
+	r.HandleFunc("/ping", h.PingDBHandler).Methods(http.MethodGet)
 	r.HandleFunc("/{URL}", h.RootURLHandler).Methods(http.MethodGet)
 
 	r.HandleFunc("/api/shorten", h.APIShortenHandler).Methods(http.MethodPost)
-	r.HandleFunc("/api/user/urls", h.APIUserURL).Methods(http.MethodGet)
+	r.HandleFunc("/api/user/urls", h.APIUserURLHandler).Methods(http.MethodGet)
 
 	r.HandleFunc("/", h.BadRequestHandler)
 	r.Use(middleware.GzipMiddleware)
@@ -34,7 +35,8 @@ func RouterStart(h *DecoratedHandler) error {
 }
 
 type DecoratedHandler struct {
-	ServerAddress string
-	BaseURL       string
-	Storage       repo.AbstractStorage
+	ServerAddress            string
+	BaseURL                  string
+	Storage                  repo.AbstractStorage
+	DatabaseConnectionString string
 }

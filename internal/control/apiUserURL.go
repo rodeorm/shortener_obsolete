@@ -8,7 +8,7 @@ import (
 )
 
 /*APIUserURL возвращает пользователю все когда-либо сокращённые им URL в формате JSON*/
-func (h DecoratedHandler) APIUserURL(w http.ResponseWriter, r *http.Request) {
+func (h DecoratedHandler) APIUserURLHandler(w http.ResponseWriter, r *http.Request) {
 	w, userKey := h.GetUserIdentity(w, r)
 	userID, err := strconv.Atoi(userKey)
 	if err != nil {
