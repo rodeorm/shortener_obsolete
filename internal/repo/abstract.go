@@ -26,7 +26,9 @@ func initMemoryStorage() *memoryStorage {
 }
 
 func initFileStorage(filePath string) *fileStorage {
-	storage := fileStorage{filePath: filePath}
+	usr := make(map[int]*User)
+	usrURL := make(map[int]*[]UserURLPair)
+	storage := fileStorage{filePath: filePath, users: usr, userURLPairs: usrURL}
 	storage.CheckFile(filePath)
 	return &storage
 }

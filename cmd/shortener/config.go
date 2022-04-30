@@ -13,7 +13,7 @@ func config() *control.DecoratedHandler {
 	flag.Parse()
 	//	os.Setenv("SERVER_ADDRESS", "localhost:8080")
 	//	os.Setenv("BASE_URL", "http://tiny")
-	//  os.Setenv("FILE_STORAGE_PATH", "D:/file.txt  nn")
+	os.Setenv("FILE_STORAGE_PATH", "D:/file.txt")
 	var serverAddress, baseURL, fileStoragePath string
 
 	// fmt.Println("flags", *a, *b, *f)
