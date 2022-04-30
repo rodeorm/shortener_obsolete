@@ -56,7 +56,7 @@ func (s memoryStorage) InsertUser(Key int) (*User, error) {
 }
 
 //InsertUserURLPair cохраняет информацию о том, что пользователь сокращал URL, если такой информации ранее не было
-func (s memoryStorage) insertUserURLPair(userKey, origin, shorten string) error {
+func (s memoryStorage) insertUserURLPair(userKey, shorten, origin string) error {
 	userID, err := strconv.Atoi(userKey)
 	if err != nil {
 		return fmt.Errorf("ошибка обработки идентификатора пользователя: %s", err)
