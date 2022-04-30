@@ -98,6 +98,9 @@ func (s memoryStorage) SelectUserByKey(Key int) (*User, error) {
 
 //SelectUserURL возвращает перечень соответствий между оригинальным и коротким адресом для конкретного пользователя
 func (s memoryStorage) SelectUserURLHistory(Key int) (*[]UserURLPair, error) {
+	if s.userURLPairs[Key] == nil {
+		return nil, fmt.Errorf("нет истории")
+	}
 	return s.userURLPairs[Key], nil
 }
 
