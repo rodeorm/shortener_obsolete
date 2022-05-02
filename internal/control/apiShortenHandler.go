@@ -13,7 +13,7 @@ import (
 func (h DecoratedHandler) APIShortenHandler(w http.ResponseWriter, r *http.Request) {
 	url := repo.URL{}
 	shortURL := repo.ShortenURL{}
-	
+
 	w, userKey := h.GetUserIdentity(w, r)
 	bodyBytes, _ := ioutil.ReadAll(r.Body)
 	err := json.Unmarshal(bodyBytes, &url)
@@ -23,7 +23,7 @@ func (h DecoratedHandler) APIShortenHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	shortURLKey, err := h.Storage.InsertURL(url.Key, h.BaseURL, userKey)
+	shortURLKey, err, isDuplicated := h.Storage.InsertURL(url.Key, h.BaseURL, userKey)
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -31,7 +31,12 @@ func (h DecoratedHandler) APIShortenHandler(w http.ResponseWriter, r *http.Reque
 	}
 	w.Header().Set("Content-Type", "application/json")
 	shortURL.Key = h.BaseURL + "/" + shortURLKey
-	w.WriteHeader(http.StatusCreated)
+	if isDuplicated {
+		w.WriteHeader(http.StatusConflict)
+	} else {
+		w.WriteHeader(http.StatusCreated)
+	}
+
 	bodyBytes, err = json.Marshal(shortURL)
 	if err != nil {
 		fmt.Println(err)

@@ -15,14 +15,14 @@ type memoryStorage struct {
 }
 
 //InsertShortURL принимает оригинальный URL, генерирует для него ключ и сохраняет соответствие оригинального URL и ключа (либо возвращает ранее созданный ключ)
-func (s memoryStorage) InsertURL(URL, baseURL, userKey string) (string, error) {
+func (s memoryStorage) InsertURL(URL, baseURL, userKey string) (string, error, bool) {
 	if !logic.CheckURLValidity(URL) {
-		return "", fmt.Errorf("невалидный URL: %s", URL)
+		return "", fmt.Errorf("невалидный URL: %s", URL), false
 	}
 	key, isExist := s.originalToShort[URL]
 	if isExist {
 		s.insertUserURLPair(userKey, baseURL+"/"+key, URL)
-		return key, nil
+		return key, nil, true
 	}
 	key, _ = logic.ReturnShortKey(5)
 
@@ -31,7 +31,7 @@ func (s memoryStorage) InsertURL(URL, baseURL, userKey string) (string, error) {
 
 	s.insertUserURLPair(userKey, baseURL+"/"+key, URL)
 
-	return key, nil
+	return key, nil, false
 }
 
 //SelectOriginalURL принимает на вход короткий URL (относительный, без имени домена), извлекает из него ключ и возвращает оригинальный URL из хранилища

@@ -7,7 +7,7 @@ import (
 
 type AbstractStorage interface {
 	// Сохраняет соответствие между оригинальным и коротким адресом
-	InsertURL(URL, baseURL, userKey string) (string, error)
+	InsertURL(URL, baseURL, userKey string) (string, error, bool)
 
 	// Возвращает оригинальный адрес на основании короткого
 	SelectOriginalURL(shortURL string) (string, bool, error)
@@ -79,4 +79,3 @@ func InitPostgresStorage(connectionString string) (*postgresStorage, error) {
 
 	return &storage, nil
 }
-

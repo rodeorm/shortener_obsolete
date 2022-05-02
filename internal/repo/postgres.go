@@ -63,10 +63,10 @@ func (s postgresStorage) InsertUser(Key int) (*User, error) {
 }
 
 //InsertShortURL принимает оригинальный URL, генерирует для него ключ, сохраняет соответствие оригинального URL и ключа и возвращает ключ (либо возвращает ранее созданный ключ)
-func (s postgresStorage) InsertURL(URL, baseURL, userKey string) (string, error) {
+func (s postgresStorage) InsertURL(URL, baseURL, userKey string) (string, error, bool) {
 	if !logic.CheckURLValidity(URL) {
 
-		return "", fmt.Errorf("невалидный URL: %s", URL)
+		return "", fmt.Errorf("невалидный URL: %s", URL), false
 	}
 
 	ctx := context.TODO()
@@ -74,27 +74,27 @@ func (s postgresStorage) InsertURL(URL, baseURL, userKey string) (string, error)
 	var short string
 
 	// Проверяем на то, что ранее пользователь не сокращал URL
-	s.DB.QueryRowContext(ctx, "SELECT short from Urls WHERE UserID = $1 AND original = $2", userKey, URL).Scan(&short)
-	// s.DB.QueryRowContext(ctx, "SELECT short from Urls WHERE original = $1", URL).Scan(&short)
+	//s.DB.QueryRowContext(ctx, "SELECT short from Urls WHERE UserID = $1 AND original = $2", userKey, URL).Scan(&short)
+	s.DB.QueryRowContext(ctx, "SELECT short from Urls WHERE original = $1", URL).Scan(&short)
 	if short != "" {
-		return short, nil
+		return short, nil, true
 	}
 	// Вставляем новый URL
 	shortKey, err := logic.ReturnShortKey(5)
 	if err != nil {
 		fmt.Println(err)
-		return "", err
+		return "", err, false
 	}
 
 	_, err = s.DB.ExecContext(ctx, "INSERT INTO Urls (original, short, userID) SELECT $1, $2, $3", URL, fmt.Sprint(shortKey), userKey)
 
 	if err != nil {
 		fmt.Println(err)
-		return "", err
+		return "", err, false
 	}
 	// a, err := res.LastInsertId()
 
-	return shortKey, nil
+	return shortKey, nil, false
 }
 
 //SelectOriginalURL принимает на вход короткий URL (относительный, без имени домена), извлекает из него ключ и возвращает оригинальный URL из хранилища

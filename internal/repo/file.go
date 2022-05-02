@@ -36,15 +36,15 @@ func (s fileStorage) CheckFile(filePath string) error {
 }
 
 // InsertShortURL принимает оригинальный URL, генерирует для него ключ и сохраняет соответствие оригинального URL и ключа (либо возвращает ранее созданный ключ)
-func (s fileStorage) InsertURL(URL, baseURL, userKey string) (string, error) {
+func (s fileStorage) InsertURL(URL, baseURL, userKey string) (string, error, bool) {
 
 	if !logic.CheckURLValidity(URL) {
-		return "", fmt.Errorf("невалидный URL: %s", URL)
+		return "", fmt.Errorf("невалидный URL: %s", URL), false
 	}
 	URL = logic.GetClearURL(URL, "")
 	key, isExist := s.getShortlURLFromFile(URL)
 	if isExist {
-		return key, nil
+		return key, nil, true
 	}
 	key, _ = logic.ReturnShortKey(5)
 
@@ -56,12 +56,12 @@ func (s fileStorage) InsertURL(URL, baseURL, userKey string) (string, error) {
 	pair := URLPair{Origin: URL, Short: key}
 	data, err := json.Marshal(pair)
 	if err != nil {
-		return "", err
+		return "", err, false
 	}
 	s.insertUserURLPair(userKey, baseURL+"/"+key, URL)
 	data = append(data, '\n')
 	_, err = f.Write(data)
-	return key, err
+	return key, err, false
 }
 
 //getShortlURLFromFile возвращает из файла сокращенный URL по оригинальному URL
