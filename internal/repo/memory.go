@@ -117,3 +117,7 @@ func (s memoryStorage) getNextFreeKey() int {
 	}
 	return maxNumber + 1
 }
+
+func (s memoryStorage) CloseConnection() {
+	fmt.Println("Закрыто")
+}

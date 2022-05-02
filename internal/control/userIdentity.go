@@ -12,6 +12,7 @@ func (h DecoratedHandler) GetUserIdentity(w http.ResponseWriter, r *http.Request
 	userKey, err := cookie.GetUserKeyFromCoockie(r)
 
 	if err != nil {
+
 		user, _ := h.Storage.InsertUser(0)
 		userKey = fmt.Sprint(user.Key)
 		http.SetCookie(w, cookie.PutUserKeyToCookie(userKey))

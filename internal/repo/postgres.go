@@ -1,152 +1,138 @@
 package repo
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
 	_ "github.com/lib/pq"
+	"github.com/rodeorm/shortener/internal/logic"
 )
 
-/*
 type postgresStorage struct {
-	originalToShort  map[string]string
-	shortToOriginal  map[string]string
-	users            map[int]*User
-	userURLPairs     map[int]*[]UserURLPair
 	DB               *sql.DB // Драйвер подключения к СУБД
 	DBName           string  // Имя БД из конфиг.файла
 	ConnectionString string  // Строка подключения из конфиг.файла
 }
 
-//InsertShortURL принимает оригинальный URL, генерирует для него ключ и сохраняет соответствие оригинального URL и ключа (либо возвращает ранее созданный ключ)
-func (s postgresStorage) InsertURL(URL, baseURL, userKey string) (string, error) {
-	if !logic.CheckURLValidity(URL) {
-		return "", fmt.Errorf("невалидный URL: %s", URL)
+func (s postgresStorage) createTables(ctx context.Context) error {
+	_, err := s.DB.ExecContext(ctx,
+		"DROP TABLE IF EXISTS Urls;"+
+			"DROP TABLE IF EXISTS Users;"+
+			"CREATE TABLE IF NOT EXISTS  Users"+
+			"("+
+			"ID SERIAL PRIMARY KEY"+
+			", Name VARCHAR(10) NULL"+
+			")"+
+			"; CREATE TABLE IF NOT EXISTS  Urls"+
+			"("+
+			"ID SERIAL PRIMARY KEY"+
+			" , Original VARCHAR(1000) NOT NULL "+
+			", Short VARCHAR(30) NOT NULL"+
+			", UserID	INT  REFERENCES Users (ID) NOT NULL"+
+			")")
+	if err != nil {
+		fmt.Println("Проблема при создании таблиц")
+		return err
 	}
-	key, isExist := s.originalToShort[URL]
-	if isExist {
-		s.insertUserURLPair(userKey, baseURL+"/"+key, URL)
-		return key, nil
-	}
-	key, _ = logic.ReturnShortKey(5)
-
-	s.originalToShort[URL] = key
-	s.shortToOriginal[key] = URL
-
-	s.insertUserURLPair(userKey, baseURL+"/"+key, URL)
-
-	return key, nil
-}
-
-//SelectOriginalURL принимает на вход короткий URL (относительный, без имени домена), извлекает из него ключ и возвращает оригинальный URL из хранилища
-func (s postgresStorage) SelectOriginalURL(shortURL string) (string, bool, error) {
-	originalURL, isExist := s.shortToOriginal[shortURL]
-	return originalURL, isExist, nil
+	return nil
 }
 
 //InsertUser сохраняет нового пользователя или возвращает уже имеющегося в наличии
 func (s postgresStorage) InsertUser(Key int) (*User, error) {
+	ctx := context.TODO()
+
 	if Key == 0 {
-		user := &User{Key: s.getNextFreeKey()}
-		s.users[user.Key] = user
-		return user, nil
-	}
-	user, isExist := s.users[Key]
-	if !isExist {
-		user = &User{Key: Key}
-		s.users[Key] = user
-	}
-	return user, nil
-}
-
-//InsertUserURLPair cохраняет информацию о том, что пользователь сокращал URL, если такой информации ранее не было
-func (s postgresStorage) insertUserURLPair(userKey, shorten, origin string) error {
-	userID, err := strconv.Atoi(userKey)
-	if err != nil {
-		return fmt.Errorf("ошибка обработки идентификатора пользователя: %s", err)
-	}
-
-	URLPair := &UserURLPair{UserKey: userID, Short: shorten, Origin: origin}
-
-	userURLPairs, isExist := s.userURLPairs[URLPair.UserKey]
-	if !isExist {
-		userURLPair := *URLPair
-		new := make([]UserURLPair, 0, 10)
-		new = append(new, userURLPair)
-		s.userURLPairs[URLPair.UserKey] = &new
-		return nil
-	}
-
-	for _, value := range *userURLPairs {
-		if value.Origin == URLPair.Origin {
-			return nil
+		sqlStatement := `
+		INSERT INTO Users (Name)
+		VALUES ($1)
+		RETURNING id`
+		id := 0
+		err := s.DB.QueryRowContext(ctx, sqlStatement, "yandex").Scan(&id)
+		if err != nil {
+			fmt.Println("Ошибки при вставке в БД", err)
+			return nil, err
 		}
+		return &User{Key: id}, nil
 	}
-	*s.userURLPairs[URLPair.UserKey] = append(*s.userURLPairs[URLPair.UserKey], *URLPair)
+	var key int
+	s.DB.QueryRowContext(ctx, "SELECT ID from Users WHERE ID = $1", fmt.Sprint(Key)).Scan(&key)
 
-	fmt.Println("Хранится историй запросов пользователей на данный момент: ")
-	for _, v := range s.userURLPairs {
-		fmt.Println(*v)
-	}
-
-	return nil
+	return &User{Key: key}, nil
 }
 
-func (s postgresStorage) SelectUserByKey(Key int) (*User, error) {
-	user, isExist := s.users[Key]
-	if !isExist {
-		return nil, fmt.Errorf("нет пользователя с ключом: %d", Key)
+//InsertShortURL принимает оригинальный URL, генерирует для него ключ, сохраняет соответствие оригинального URL и ключа и возвращает ключ (либо возвращает ранее созданный ключ)
+func (s postgresStorage) InsertURL(URL, baseURL, userKey string) (string, error) {
+	if !logic.CheckURLValidity(URL) {
+
+		return "", fmt.Errorf("невалидный URL: %s", URL)
 	}
-	return user, nil
+
+	ctx := context.TODO()
+
+	var short string
+
+	// Проверяем на то, что ранее пользователь не сокращал URL
+	s.DB.QueryRowContext(ctx, "SELECT short from Urls WHERE UserID = $1 AND original = $2", userKey, URL).Scan(&short)
+	// s.DB.QueryRowContext(ctx, "SELECT short from Urls WHERE original = $1", URL).Scan(&short)
+	if short != "" {
+		return short, nil
+	}
+	// Вставляем новый URL
+	shortKey, err := logic.ReturnShortKey(5)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+
+	_, err = s.DB.ExecContext(ctx, "INSERT INTO Urls (original, short, userID) SELECT $1, $2, $3", URL, fmt.Sprint(shortKey), userKey)
+
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+	// a, err := res.LastInsertId()
+
+	return shortKey, nil
 }
 
-//SelectUserURL возвращает перечень соответствий между оригинальным и коротким адресом для конкретного пользователя
+//SelectOriginalURL принимает на вход короткий URL (относительный, без имени домена), извлекает из него ключ и возвращает оригинальный URL из хранилища
+func (s postgresStorage) SelectOriginalURL(shortURL string) (string, bool, error) {
+	ctx := context.TODO()
+	var original string
+
+	// Проверяем на то, что ранее пользователь не сокращал URL
+	s.DB.QueryRowContext(ctx, "SELECT original FROM Urls WHERE short = $1", shortURL).Scan(&original)
+	if original != "" {
+		return original, true, nil
+	}
+	return "", false, nil
+}
+
+//SelectUserURLHistory возвращает перечень соответствий между оригинальным и коротким адресом для конкретного пользователя
 func (s postgresStorage) SelectUserURLHistory(Key int) (*[]UserURLPair, error) {
-	if s.userURLPairs[Key] == nil {
+	urls := make([]UserURLPair, 0, 1)
+	ctx := context.TODO()
+	rows, err := s.DB.QueryContext(ctx, "SELECT original, short, userID FROM Urls WHERE UserID = $1", fmt.Sprint(Key))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var pair UserURLPair
+		err = rows.Scan(&pair.Origin, &pair.Short, &Key)
+		if err != nil {
+			return nil, err
+		}
+		urls = append(urls, pair)
+	}
+	if len(urls) == 0 {
 		return nil, fmt.Errorf("нет истории")
 	}
-	return s.userURLPairs[Key], nil
+	return &urls, nil
 }
 
-//getNextFreeKey возвращает ближайший свободный идентификатор пользователя
-func (s postgresStorage) getNextFreeKey() int {
-	var maxNumber int
-	for maxNumber = range s.users {
-		break
-	}
-	for n := range s.users {
-		if n > maxNumber {
-			maxNumber = n
-		}
-	}
-	return maxNumber + 1
-}
-
-//CloseConnect закрывает соединение
-func (s postgresStorage) CloseConnect() error {
-	var err error
-	fmt.Println("Закрыто соединение с сервером баз данных")
-	err = s.DB.Close()
-	if err != nil {
-		fmt.Println("Ошибка при попытке закрыть соединение с базой данных: ", err.Error())
-	}
-	return err
-}
-*/
-
-//ConnectToDatabase соединяет непосредственно с экземпляром СУБД
-func ConnectToDatabase(connectionString string) error {
-	db, err := sql.Open("postgres", connectionString)
-	if err != nil {
-		fmt.Println("Не подключается к СУБД: ", err.Error())
-		return err
-	}
-	defer db.Close()
-	err = db.Ping()
-	if err != nil {
-		fmt.Println("Не пингуется СУБД: ", err.Error())
-		return err
-	}
-	fmt.Println("Соединение с СУБД установлено", connectionString)
-	return err
+func (s postgresStorage) CloseConnection() {
+	s.DB.Close()
 }

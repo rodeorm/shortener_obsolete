@@ -29,7 +29,7 @@ func TestAPIHandlers(t *testing.T) {
 		{
 			//Нужно принимать и возвращать JSON
 			name:    "Проверка обработки корректных запросов: POST (json)",
-			handler: DecoratedHandler{ServerAddress: "http://localhost:8080", Storage: repo.NewStorage("")},
+			handler: DecoratedHandler{ServerAddress: "http://localhost:8080", Storage: repo.NewStorage("", "")},
 			method:  "POST",
 			body:    `{"url":"http://www.yandex.ru"}`,
 			request: "http://localhost:8080/api/shorten",
@@ -38,7 +38,7 @@ func TestAPIHandlers(t *testing.T) {
 		{
 			//Нужно принимать и возвращать JSON
 			name:    "Проверка обработки некорректных запросов: POST (json)",
-			handler: DecoratedHandler{ServerAddress: "http://localhost:8080", Storage: repo.NewStorage("")},
+			handler: DecoratedHandler{ServerAddress: "http://localhost:8080", Storage: repo.NewStorage("", "")},
 			method:  "POST",
 			body:    ``,
 			request: "http://localhost:8080/api/shorten",

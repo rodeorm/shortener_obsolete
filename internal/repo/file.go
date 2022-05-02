@@ -184,3 +184,7 @@ func (s fileStorage) getNextFreeKey() int {
 	}
 	return maxNumber + 1
 }
+
+func (s fileStorage) CloseConnection() {
+	fmt.Println("Закрыто")
+}

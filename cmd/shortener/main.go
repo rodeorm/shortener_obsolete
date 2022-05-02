@@ -12,7 +12,6 @@ import "github.com/rodeorm/shortener/internal/control"
 */
 
 func main() {
-
 	handler := config()
 	control.RouterStart(handler)
 }

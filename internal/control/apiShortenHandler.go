@@ -13,7 +13,7 @@ import (
 func (h DecoratedHandler) APIShortenHandler(w http.ResponseWriter, r *http.Request) {
 	url := repo.URL{}
 	shortURL := repo.ShortenURL{}
-
+	
 	w, userKey := h.GetUserIdentity(w, r)
 	bodyBytes, _ := ioutil.ReadAll(r.Body)
 	err := json.Unmarshal(bodyBytes, &url)
@@ -22,6 +22,7 @@ func (h DecoratedHandler) APIShortenHandler(w http.ResponseWriter, r *http.Reque
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
 	shortURLKey, err := h.Storage.InsertURL(url.Key, h.BaseURL, userKey)
 	if err != nil {
 		fmt.Println(err)
