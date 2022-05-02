@@ -16,9 +16,13 @@ func RouterStart(h *DecoratedHandler) error {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", h.RootHandler).Methods(http.MethodPost)
+	r.HandleFunc("/ping", h.PingDBHandler).Methods(http.MethodGet)
 	r.HandleFunc("/{URL}", h.RootURLHandler).Methods(http.MethodGet)
 
 	r.HandleFunc("/api/shorten", h.APIShortenHandler).Methods(http.MethodPost)
+	r.HandleFunc("/api/user/urls", h.APIUserURLHandler).Methods(http.MethodGet)
+	r.HandleFunc("/api/shorten/batch", h.APIShortenBatch).Methods(http.MethodPost)
+
 	r.HandleFunc("/", h.BadRequestHandler)
 	r.Use(middleware.GzipMiddleware)
 	srv := &http.Server{
@@ -28,11 +32,13 @@ func RouterStart(h *DecoratedHandler) error {
 		ReadTimeout:  15 * time.Second,
 	}
 	log.Fatal(srv.ListenAndServe())
+	h.Storage.CloseConnection()
 	return nil
 }
 
 type DecoratedHandler struct {
-	ServerAddress string
-	BaseURL       string
-	Storage       repo.AbstractStorage
+	ServerAddress            string
+	BaseURL                  string
+	Storage                  repo.AbstractStorage
+	DatabaseConnectionString string
 }

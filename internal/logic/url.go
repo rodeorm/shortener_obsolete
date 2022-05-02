@@ -1,24 +1,18 @@
 package logic
 
 import (
+	"net/url"
 	"strings"
 )
-
-type URL struct {
-	Key string `json:"url,omitempty"`
-}
-
-type ShortenURL struct {
-	Key string `json:"result,omitempty"`
-}
-
-type URLPair struct {
-	Origin string `json:"origin,omitempty"`
-	Short  string `json:"short,omitempty"`
-}
 
 //GetClearURL делает URL строчным, убирает наименование домена
 func GetClearURL(s string, d string) string {
 	s = strings.ToLower(s)
 	return strings.Replace(s, d, "", 1)
+}
+
+// CheckURLValidity проверяет URL на корректность
+func CheckURLValidity(u string) bool {
+	_, err := url.ParseRequestURI(u)
+	return err == nil
 }
