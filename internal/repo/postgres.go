@@ -31,7 +31,8 @@ func (s postgresStorage) createTables(ctx context.Context) error {
 			", Short VARCHAR(30) NOT NULL"+
 			", UserID	INT  REFERENCES Users (ID) NOT NULL"+
 			", CorrelationID varchar(100) NULL"+
-			")")
+			");"+
+			"CREATE UNIQUE INDEX IF NOT EXISTS url_unique_idx ON Urls (original, UserID) INCLUDE (short);")
 	if err != nil {
 		fmt.Println("Проблема при создании таблиц")
 		return err
@@ -114,6 +115,7 @@ func (s postgresStorage) SelectOriginalURL(shortURL string) (string, bool, error
 func (s postgresStorage) SelectUserURLHistory(Key int) (*[]UserURLPair, error) {
 	urls := make([]UserURLPair, 0, 1)
 	ctx := context.TODO()
+	fmt.Println("Пользователь", Key)
 	rows, err := s.DB.QueryContext(ctx, "SELECT original, short, userID FROM Urls WHERE UserID = $1", fmt.Sprint(Key))
 	if err != nil {
 		return nil, err

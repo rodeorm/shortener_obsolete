@@ -80,11 +80,6 @@ func (s memoryStorage) insertUserURLPair(userKey, shorten, origin string) error 
 	}
 	*s.userURLPairs[URLPair.UserKey] = append(*s.userURLPairs[URLPair.UserKey], *URLPair)
 
-	fmt.Println("Хранится историй запросов пользователей на данный момент: ")
-	for _, v := range s.userURLPairs {
-		fmt.Println(*v)
-	}
-
 	return nil
 }
 
