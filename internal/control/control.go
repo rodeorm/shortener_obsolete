@@ -21,6 +21,7 @@ func RouterStart(h *DecoratedHandler) error {
 
 	r.HandleFunc("/api/shorten", h.APIShortenHandler).Methods(http.MethodPost)
 	r.HandleFunc("/api/user/urls", h.APIUserURLHandler).Methods(http.MethodGet)
+	r.HandleFunc("/api/shorten/batch", h.APIShortenBatch).Methods(http.MethodPost)
 
 	r.HandleFunc("/", h.BadRequestHandler)
 	r.Use(middleware.GzipMiddleware)

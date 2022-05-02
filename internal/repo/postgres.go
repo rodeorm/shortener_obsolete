@@ -30,6 +30,7 @@ func (s postgresStorage) createTables(ctx context.Context) error {
 			" , Original VARCHAR(1000) NOT NULL "+
 			", Short VARCHAR(30) NOT NULL"+
 			", UserID	INT  REFERENCES Users (ID) NOT NULL"+
+			", CorrelationID varchar(100) NULL"+
 			")")
 	if err != nil {
 		fmt.Println("Проблема при создании таблиц")

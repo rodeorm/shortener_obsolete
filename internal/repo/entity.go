@@ -21,6 +21,18 @@ type UserURLPair struct {
 	Origin  string `json:"original_url,omitempty"`
 }
 
+//UrlWithCorrelationRequest множество url для запроса api/shorten/batch
+type UrlWithCorrelationRequest struct {
+	CorID  string `json:"correlation_id,omitempty"`
+	Origin string `json:"original_url,omitempty"`
+}
+
+//UrlWithCorrelationResponse множество url для ответа api/shorten/batch
+type UrlWithCorrelationResponse struct {
+	CorID string `json:"correlation_id,omitempty"`
+	Short string `json:"short_url,omitempty"`
+}
+
 type User struct {
 	Key  int
 	Sign string
