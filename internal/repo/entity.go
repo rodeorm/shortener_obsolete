@@ -23,13 +23,13 @@ type UserURLPair struct {
 }
 
 //UrlWithCorrelationRequest множество url для запроса api/shorten/batch
-type UrlWithCorrelationRequest struct {
+type URLWithCorrelationRequest struct {
 	CorID  string `json:"correlation_id,omitempty"`
 	Origin string `json:"original_url,omitempty"`
 }
 
 //UrlWithCorrelationResponse множество url для ответа api/shorten/batch
-type UrlWithCorrelationResponse struct {
+type URLWithCorrelationResponse struct {
 	CorID string `json:"correlation_id,omitempty"`
 	Short string `json:"short_url,omitempty"`
 }
