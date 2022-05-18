@@ -130,6 +130,10 @@ func (s postgresStorage) SelectUserURLHistory(Key int) (*[]UserURLPair, error) {
 		return nil, err
 	}
 
+	if rows.Err() != nil {
+		return nil, err
+	}
+
 	defer rows.Close()
 
 	for rows.Next() {
