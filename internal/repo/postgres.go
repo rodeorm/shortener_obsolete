@@ -123,19 +123,21 @@ func (s postgresStorage) SelectOriginalURL(shortURL string) (string, bool, bool,
 func (s postgresStorage) SelectUserURLHistory(Key int) (*[]UserURLPair, error) {
 	urls := make([]UserURLPair, 0, 1)
 	ctx := context.TODO()
-	fmt.Println("Пользователь", Key)
 	rows, err := s.DB.QueryContext(ctx, "SELECT original, short, userID FROM Urls WHERE UserID = $1", fmt.Sprint(Key))
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
 
 	for rows.Next() {
 		var pair UserURLPair
+
 		err = rows.Scan(&pair.Origin, &pair.Short, &Key)
 		if err != nil {
 			return nil, err
 		}
+
 		urls = append(urls, pair)
 	}
 	if len(urls) == 0 {
@@ -167,7 +169,8 @@ func (s postgresStorage) DeleteURLs(URL, userKey string) (bool, error) {
 	urls := logic.GetSliceFromString(URL)
 
 	for _, v := range urls {
-		if _, err = stmt.ExecContext(ctx, v); err != nil {
+		_, err = stmt.ExecContext(ctx, v)
+		if err != nil {
 			return false, err
 		}
 	}
