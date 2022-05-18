@@ -106,8 +106,10 @@ func (s postgresStorage) SelectOriginalURL(shortURL string) (string, bool, bool,
 		isDeleted bool
 	)
 
-	s.DB.QueryRowContext(ctx, "SELECT original, isDeleted FROM Urls WHERE short = $1", shortURL).Scan(&original, &isDeleted)
-
+	err := s.DB.QueryRowContext(ctx, "SELECT original, isDeleted FROM Urls WHERE short = $1", shortURL).Scan(&original, &isDeleted)
+	if err != nil {
+		return "", false, false, err
+	}
 	if isDeleted {
 		return original, true, true, nil
 	}
