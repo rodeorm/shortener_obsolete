@@ -36,15 +36,15 @@ func (s fileStorage) CheckFile(filePath string) error {
 }
 
 // InsertShortURL принимает оригинальный URL, генерирует для него ключ и сохраняет соответствие оригинального URL и ключа (либо возвращает ранее созданный ключ)
-func (s fileStorage) InsertURL(URL, baseURL, userKey string) (string, error, bool) {
+func (s fileStorage) InsertURL(URL, baseURL, userKey string) (string, bool, error) {
 
 	if !logic.CheckURLValidity(URL) {
-		return "", fmt.Errorf("невалидный URL: %s", URL), false
+		return "", false, fmt.Errorf("невалидный URL: %s", URL)
 	}
 	URL = logic.GetClearURL(URL, "")
 	key, isExist := s.getShortlURLFromFile(URL)
 	if isExist {
-		return key, nil, true
+		return key, true, nil
 	}
 	key, _ = logic.ReturnShortKey(5)
 
@@ -56,12 +56,12 @@ func (s fileStorage) InsertURL(URL, baseURL, userKey string) (string, error, boo
 	pair := URLPair{Origin: URL, Short: key}
 	data, err := json.Marshal(pair)
 	if err != nil {
-		return "", err, false
+		return "", false, err
 	}
 	s.insertUserURLPair(userKey, baseURL+"/"+key, URL)
 	data = append(data, '\n')
 	_, err = f.Write(data)
-	return key, err, false
+	return key, false, err
 }
 
 //getShortlURLFromFile возвращает из файла сокращенный URL по оригинальному URL
@@ -86,7 +86,7 @@ func (s fileStorage) getShortlURLFromFile(URL string) (string, bool) {
 }
 
 // SelectOriginalURL принимает на вход короткий URL (относительный, без имени домена), извлекает из него ключ и возвращает оригинальный URL из хранилища
-func (s fileStorage) SelectOriginalURL(shortURL string) (string, bool, error) {
+func (s fileStorage) SelectOriginalURL(shortURL string) (string, bool, bool, error) {
 
 	file, err := os.Open(s.filePath)
 	if err != nil {
@@ -99,11 +99,11 @@ func (s fileStorage) SelectOriginalURL(shortURL string) (string, bool, error) {
 	for scanner.Scan() {
 		json.Unmarshal(scanner.Bytes(), &up)
 		if up.Short == shortURL {
-			return up.Origin, true, nil
+			return up.Origin, true, false, nil
 		}
 	}
 
-	return "", false, err
+	return "", false, false, err
 
 }
 
@@ -187,4 +187,8 @@ func (s fileStorage) getNextFreeKey() int {
 
 func (s fileStorage) CloseConnection() {
 	fmt.Println("Закрыто")
+}
+
+func (s fileStorage) DeleteURLs(URL, userKey string) (bool, error) {
+	return true, nil
 }

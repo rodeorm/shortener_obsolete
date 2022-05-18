@@ -23,7 +23,7 @@ func (h DecoratedHandler) APIShortenBatch(w http.ResponseWriter, r *http.Request
 	}
 
 	for _, value := range urlReq {
-		shortURLKey, err, _ := h.Storage.InsertURL(value.Origin, h.BaseURL, userKey)
+		shortURLKey, _, err := h.Storage.InsertURL(value.Origin, h.BaseURL, userKey)
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusBadRequest)

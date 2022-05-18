@@ -20,7 +20,8 @@ func RouterStart(h *DecoratedHandler) error {
 	r.HandleFunc("/{URL}", h.RootURLHandler).Methods(http.MethodGet)
 
 	r.HandleFunc("/api/shorten", h.APIShortenHandler).Methods(http.MethodPost)
-	r.HandleFunc("/api/user/urls", h.APIUserURLHandler).Methods(http.MethodGet)
+	r.HandleFunc("/api/user/urls", h.APIUserGetURLsHandler).Methods(http.MethodGet)
+	r.HandleFunc("/api/user/urls", h.APIUserDeleteURLsHandler).Methods(http.MethodDelete)
 	r.HandleFunc("/api/shorten/batch", h.APIShortenBatch).Methods(http.MethodPost)
 
 	r.HandleFunc("/", h.BadRequestHandler)

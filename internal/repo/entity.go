@@ -19,6 +19,7 @@ type UserURLPair struct {
 	UserKey int    `json:"-"`
 	Short   string `json:"short_url,omitempty"`
 	Origin  string `json:"original_url,omitempty"`
+	// isDeleted bool   `json:"-"`
 }
 
 //UrlWithCorrelationRequest множество url для запроса api/shorten/batch
