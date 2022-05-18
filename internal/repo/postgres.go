@@ -170,7 +170,7 @@ func (s postgresStorage) DeleteURLs(URL, userKey string) (bool, error) {
 	urls := logic.GetSliceFromString(URL)
 
 	for _, v := range urls {
-		_, err = stmt.ExecContext(ctx, v)
+		_, err = stmt.ExecContext(ctx, v, userKey)
 		if err != nil {
 			return false, err
 		}
