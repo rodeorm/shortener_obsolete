@@ -14,12 +14,11 @@ RootURLHandler GET /{id} принимает в качестве URL-параме
 */
 func (h DecoratedHandler) RootURLHandler(w http.ResponseWriter, r *http.Request) {
 	currentID := mux.Vars(r)["URL"]
-	originalURL, isDeleted, isExist, _ := h.Storage.SelectOriginalURL(currentID)
+	originalURL, isExist, isDeleted, _ := h.Storage.SelectOriginalURL(currentID)
 	if isDeleted {
 		w.WriteHeader(http.StatusGone)
 		return
 	}
-
 	if isExist {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		fmt.Println("Оригинальный url, на который будет редирект: ", originalURL)

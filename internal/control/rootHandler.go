@@ -14,7 +14,6 @@ func (h DecoratedHandler) RootHandler(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, _ := ioutil.ReadAll(r.Body)
 	bodyString := string(bodyBytes)
 	shortURLKey, isDuplicated, err := h.Storage.InsertURL(bodyString, h.BaseURL, userKey)
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
