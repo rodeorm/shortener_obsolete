@@ -1,16 +1,14 @@
 package main
 
 import (
-	"errors"
 	"flag"
 )
 
 var (
-	a            *string
-	b            *string
-	f            *string
-	d            *string
-	deletedError = errors.New("url удален")
+	a *string
+	b *string
+	f *string
+	d *string
 )
 
 func init() {
