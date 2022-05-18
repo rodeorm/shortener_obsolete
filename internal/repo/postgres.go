@@ -153,35 +153,33 @@ func (s postgresStorage) CloseConnection() {
 }
 
 func (s postgresStorage) DeleteURLs(URL, userKey string) (bool, error) {
-	fmt.Println("К удалению ", URL, ". для пользователя ", userKey)
-
-	ctx := context.TODO()
-	tx, err := s.DB.Begin()
-	if err != nil {
-		return false, err
-	}
-	defer tx.Rollback()
-
-	stmt, err := tx.PrepareContext(ctx, "UPDATE Urls SET isDeleted = true WHERE short = $1") // Проще, конечно, через ANY
-	//stmt, err := tx.PrepareContext(ctx, "UPDATE Urls SET isDeleted = true WHERE short = $1 AND userid = $2") // Проще, конечно, через ANY
-	if err != nil {
-		return false, err
-	}
-	defer stmt.Close()
-	urls := logic.GetSliceFromString(URL)
-
-	for _, v := range urls {
-		_, err = stmt.ExecContext(ctx, v)
+	/*
+		ctx := context.TODO()
+		tx, err := s.DB.Begin()
 		if err != nil {
 			return false, err
 		}
-	}
+		defer tx.Rollback()
 
-	err = tx.Commit()
-	if err != nil {
-		return false, err
-	}
+		//stmt, err := tx.PrepareContext(ctx, "UPDATE Urls SET isDeleted = true WHERE short = $1") // Проще, конечно, через ANY
+		stmt, err := tx.PrepareContext(ctx, "UPDATE Urls SET isDeleted = true WHERE short = $1 AND userid = $2") // Проще, конечно, через ANY
+		if err != nil {
+			return false, err
+		}
+		defer stmt.Close()
+		urls := logic.GetSliceFromString(URL)
 
-	fmt.Println("Err", err)
+		for _, v := range urls {
+			_, err = stmt.ExecContext(ctx, v)
+			if err != nil {
+				return false, err
+			}
+		}
+
+		err = tx.Commit()
+		if err != nil {
+			return false, err
+		}
+	*/
 	return true, nil
 }
