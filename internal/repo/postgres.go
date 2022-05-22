@@ -170,7 +170,7 @@ func (s postgresStorage) DeleteURLs(URL, userKey string) (bool, error) {
 	}()
 
 	for v := range makeDeletePool(ch) {
-		s.deleteURL(v, userKey)
+		go s.deleteURL(v, userKey)
 	}
 
 	return true, nil
