@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"sync"
 
 	_ "github.com/lib/pq"
 	"github.com/rodeorm/shortener/internal/logic"
@@ -157,7 +158,9 @@ func (s postgresStorage) CloseConnection() {
 }
 
 func (s postgresStorage) DeleteURLs(URL, userKey string) (bool, error) {
+	ch := make(chan string)
 
+	urls := logic.GetSliceFromString(URL)
 	ctx := context.TODO()
 	tx, err := s.DB.Begin()
 	if err != nil {
@@ -165,19 +168,22 @@ func (s postgresStorage) DeleteURLs(URL, userKey string) (bool, error) {
 	}
 	defer tx.Rollback()
 
-	//stmt, err := tx.PrepareContext(ctx, "UPDATE Urls SET isDeleted = true WHERE short = $1") // Проще, конечно, через ANY
-	stmt, err := tx.PrepareContext(ctx, "UPDATE Urls SET isDeleted = true WHERE short = $1 AND userid = $2") // Проще, конечно, через ANY
+	stmt, err := tx.PrepareContext(ctx, "UPDATE Urls SET isDeleted = true WHERE short = $1")
 	if err != nil {
 		return false, err
 	}
 	defer stmt.Close()
-	urls := logic.GetSliceFromString(URL)
 
-	for _, v := range urls {
-		_, err = stmt.ExecContext(ctx, v, userKey)
-		if err != nil {
-			return false, err
+	go func() {
+		for _, url := range urls {
+			ch <- url
 		}
+		close(ch)
+	}()
+
+	for v := range makeDeletePool(ch) {
+		s.deleteURL(ctx, v, userKey, stmt)
+
 	}
 
 	err = tx.Commit()
@@ -185,5 +191,38 @@ func (s postgresStorage) DeleteURLs(URL, userKey string) (bool, error) {
 		return false, err
 	}
 
+	return true, nil
+}
+
+func makeDeletePool(inputChs ...chan string) chan string {
+	outCh := make(chan string)
+
+	go func() {
+		wg := &sync.WaitGroup{}
+
+		for _, inputCh := range inputChs {
+			wg.Add(1)
+
+			go func(inputCh chan string) {
+				defer wg.Done()
+				for item := range inputCh {
+					outCh <- item
+				}
+			}(inputCh)
+		}
+
+		wg.Wait()
+		close(outCh)
+	}()
+
+	return outCh
+}
+
+func (s postgresStorage) deleteURL(ctx context.Context, url, userKey string, stmt *sql.Stmt) (bool, error) {
+
+	_, err := stmt.ExecContext(ctx, url, userKey)
+	if err != nil {
+		return false, err
+	}
 	return true, nil
 }
