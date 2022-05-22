@@ -161,18 +161,6 @@ func (s postgresStorage) DeleteURLs(URL, userKey string) (bool, error) {
 	ch := make(chan string)
 
 	urls := logic.GetSliceFromString(URL)
-	ctx := context.TODO()
-	tx, err := s.DB.Begin()
-	if err != nil {
-		return false, err
-	}
-	defer tx.Rollback()
-
-	stmt, err := tx.PrepareContext(ctx, "UPDATE Urls SET isDeleted = true WHERE short = $1")
-	if err != nil {
-		return false, err
-	}
-	defer stmt.Close()
 
 	go func() {
 		for _, url := range urls {
@@ -182,15 +170,35 @@ func (s postgresStorage) DeleteURLs(URL, userKey string) (bool, error) {
 	}()
 
 	for v := range makeDeletePool(ch) {
-		s.deleteURL(ctx, v, userKey, stmt)
-
+		s.deleteURL(v, userKey)
 	}
 
+	return true, nil
+}
+
+func (s postgresStorage) deleteURL(url, userKey string) (bool, error) {
+	ctx := context.TODO()
+	tx, err := s.DB.Begin()
+
+	if err != nil {
+		return false, err
+	}
+	defer tx.Rollback()
+
+	stmt, err := tx.PrepareContext(ctx, "UPDATE Urls SET isDeleted = true WHERE short = $1 AND userID = $2")
+	if err != nil {
+		return false, err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.ExecContext(ctx, url, userKey)
+	if err != nil {
+		return false, err
+	}
 	err = tx.Commit()
 	if err != nil {
 		return false, err
 	}
-
 	return true, nil
 }
 
@@ -216,13 +224,4 @@ func makeDeletePool(inputChs ...chan string) chan string {
 	}()
 
 	return outCh
-}
-
-func (s postgresStorage) deleteURL(ctx context.Context, url, userKey string, stmt *sql.Stmt) (bool, error) {
-
-	_, err := stmt.ExecContext(ctx, url, userKey)
-	if err != nil {
-		return false, err
-	}
-	return true, nil
 }
