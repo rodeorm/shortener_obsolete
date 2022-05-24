@@ -77,7 +77,8 @@ func InitPostgresStorage(connectionString string) (*postgresStorage, error) {
 	if err = db.PingContext(ctx); err != nil {
 		return nil, err
 	}
-	storage := postgresStorage{DB: db, ConnectionString: connectionString}
+	delQueue := make(chan string)
+	storage := postgresStorage{DB: db, ConnectionString: connectionString, deleteQueue: delQueue}
 	storage.createTables(ctx)
 
 	return &storage, nil

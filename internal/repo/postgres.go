@@ -11,9 +11,10 @@ import (
 )
 
 type postgresStorage struct {
-	DB               *sql.DB // Драйвер подключения к СУБД
-	DBName           string  // Имя БД из конфиг.файла
-	ConnectionString string  // Строка подключения из конфиг.файла
+	DB               *sql.DB     // Драйвер подключения к СУБД
+	DBName           string      // Имя БД из конфиг.файла
+	ConnectionString string      // Строка подключения из конфиг.файла
+	deleteQueue      chan string // канал для удаления URL
 }
 
 func (s postgresStorage) createTables(ctx context.Context) error {

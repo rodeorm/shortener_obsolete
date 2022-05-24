@@ -24,14 +24,7 @@ func (h DecoratedHandler) APIUserDeleteURLsHandler(w http.ResponseWriter, r *htt
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
+	go h.Storage.DeleteURLs(string(bodyBytes), userKey)
 	w.WriteHeader(http.StatusAccepted)
 	fmt.Fprint(w, string(bodyBytes))
-	_, err = h.Storage.DeleteURLs(string(bodyBytes), userKey)
-
-	if err != nil {
-		fmt.Println("Проблемы с удалением  url", err)
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
 }

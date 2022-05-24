@@ -15,7 +15,7 @@ func config() *control.DecoratedHandler {
 	// os.Setenv("SERVER_ADDRESS", "localhost:8080")
 	// os.Setenv("BASE_URL", "http://tiny")
 	// os.Setenv("FILE_STORAGE_PATH", "D:/file.txt")
-	// os.Setenv("DATABASE_DSN", "postgres://app:qqqQQQ123@localhost:5432/shortener?sslmode=disable")
+	os.Setenv("DATABASE_DSN", "postgres://app:qqqQQQ123@localhost:5432/shortener?sslmode=disable")
 
 	var serverAddress, baseURL, fileStoragePath, databaseConnectionString string
 

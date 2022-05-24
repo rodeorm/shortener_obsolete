@@ -33,7 +33,9 @@ func RouterStart(h *DecoratedHandler) error {
 		ReadTimeout:  15 * time.Second,
 	}
 	log.Fatal(srv.ListenAndServe())
+
 	h.Storage.CloseConnection()
+
 	return nil
 }
 
