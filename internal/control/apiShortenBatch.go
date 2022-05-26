@@ -11,8 +11,8 @@ import (
 
 func (h DecoratedHandler) APIShortenBatch(w http.ResponseWriter, r *http.Request) {
 	w, userKey := h.GetUserIdentity(w, r)
-	var urlReq []repo.UrlWithCorrelationRequest
-	var urlRes []repo.UrlWithCorrelationResponse
+	var urlReq []repo.URLWithCorrelationRequest
+	var urlRes []repo.URLWithCorrelationResponse
 	bodyBytes, _ := ioutil.ReadAll(r.Body)
 	err := json.Unmarshal(bodyBytes, &urlReq)
 
@@ -23,13 +23,13 @@ func (h DecoratedHandler) APIShortenBatch(w http.ResponseWriter, r *http.Request
 	}
 
 	for _, value := range urlReq {
-		shortURLKey, err, _ := h.Storage.InsertURL(value.Origin, h.BaseURL, userKey)
+		shortURLKey, _, err := h.Storage.InsertURL(value.Origin, h.BaseURL, userKey)
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		urlResPart := repo.UrlWithCorrelationResponse{CorID: value.CorID, Short: h.BaseURL + "/" + shortURLKey}
+		urlResPart := repo.URLWithCorrelationResponse{CorID: value.CorID, Short: h.BaseURL + "/" + shortURLKey}
 		urlRes = append(urlRes, urlResPart)
 	}
 

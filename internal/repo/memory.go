@@ -15,14 +15,14 @@ type memoryStorage struct {
 }
 
 //InsertShortURL принимает оригинальный URL, генерирует для него ключ и сохраняет соответствие оригинального URL и ключа (либо возвращает ранее созданный ключ)
-func (s memoryStorage) InsertURL(URL, baseURL, userKey string) (string, error, bool) {
+func (s memoryStorage) InsertURL(URL, baseURL, userKey string) (string, bool, error) {
 	if !logic.CheckURLValidity(URL) {
-		return "", fmt.Errorf("невалидный URL: %s", URL), false
+		return "", false, fmt.Errorf("невалидный URL: %s", URL)
 	}
 	key, isExist := s.originalToShort[URL]
 	if isExist {
 		s.insertUserURLPair(userKey, baseURL+"/"+key, URL)
-		return key, nil, true
+		return key, true, nil
 	}
 	key, _ = logic.ReturnShortKey(5)
 
@@ -31,13 +31,13 @@ func (s memoryStorage) InsertURL(URL, baseURL, userKey string) (string, error, b
 
 	s.insertUserURLPair(userKey, baseURL+"/"+key, URL)
 
-	return key, nil, false
+	return key, false, nil
 }
 
 //SelectOriginalURL принимает на вход короткий URL (относительный, без имени домена), извлекает из него ключ и возвращает оригинальный URL из хранилища
-func (s memoryStorage) SelectOriginalURL(shortURL string) (string, bool, error) {
+func (s memoryStorage) SelectOriginalURL(shortURL string) (string, bool, bool, error) {
 	originalURL, isExist := s.shortToOriginal[shortURL]
-	return originalURL, isExist, nil
+	return originalURL, isExist, false, nil
 }
 
 //InsertUser сохраняет нового пользователя или возвращает уже имеющегося в наличии
@@ -115,4 +115,8 @@ func (s memoryStorage) getNextFreeKey() int {
 
 func (s memoryStorage) CloseConnection() {
 	fmt.Println("Закрыто")
+}
+
+func (s memoryStorage) DeleteURLs(URL, userKey string) (bool, error) {
+	return true, nil
 }

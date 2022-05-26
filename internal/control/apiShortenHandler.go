@@ -23,7 +23,7 @@ func (h DecoratedHandler) APIShortenHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	shortURLKey, err, isDuplicated := h.Storage.InsertURL(url.Key, h.BaseURL, userKey)
+	shortURLKey, isDuplicated, err := h.Storage.InsertURL(url.Key, h.BaseURL, userKey)
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusBadRequest)

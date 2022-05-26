@@ -6,17 +6,20 @@ import (
 )
 
 type AbstractStorage interface {
-	// Сохраняет соответствие между оригинальным и коротким адресом
-	InsertURL(URL, baseURL, userKey string) (string, error, bool)
+	// InsertURL сохраняет соответствие между оригинальным и коротким адресом
+	InsertURL(URL, baseURL, userKey string) (string, bool, error)
 
-	// Возвращает оригинальный адрес на основании короткого
-	SelectOriginalURL(shortURL string) (string, bool, error)
+	// SelectOriginalURL возвращает оригинальный адрес на основании короткого; признак, что url ранее уже сокращался; признак, что url удален
+	SelectOriginalURL(shortURL string) (string, bool, bool, error)
 
 	//InsertUser сохраняет нового пользователя или возвращает уже имеющегося в наличии
 	InsertUser(Key int) (*User, error)
 
-	// Возвращает перечень соответствий между оригинальным и коротким адресом для конкретного пользователя
+	// SelectUserURLHistory возвращает перечень соответствий между оригинальным и коротким адресом для конкретного пользователя
 	SelectUserURLHistory(Key int) (*[]UserURLPair, error)
+
+	// Массово помечает URL как удаленные. Успешно удалить URL может только пользователь, его создавший.
+	DeleteURLs(URL, userKey string) (bool, error)
 
 	// Закрыть соединение (только для СУБД)
 	CloseConnection()
@@ -74,7 +77,8 @@ func InitPostgresStorage(connectionString string) (*postgresStorage, error) {
 	if err = db.PingContext(ctx); err != nil {
 		return nil, err
 	}
-	storage := postgresStorage{DB: db, ConnectionString: connectionString}
+	delQueue := make(chan string)
+	storage := postgresStorage{DB: db, ConnectionString: connectionString, deleteQueue: delQueue}
 	storage.createTables(ctx)
 
 	return &storage, nil
