@@ -27,7 +27,6 @@ func config() *api.DecoratedHandler {
 		os.Setenv("FILE_STORAGE_PATH", "D:/file.txt")
 		os.Setenv("DATABASE_DSN", "postgres://app:qqqQQQ123@localhost:5433/shortener?sslmode=disable")
 	*/
-
 	var serverAddress, baseURL, fileStoragePath, databaseConnectionString string
 
 	//Адрес запуска HTTP-сервера

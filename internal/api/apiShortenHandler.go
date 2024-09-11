@@ -16,10 +16,10 @@ func (h DecoratedHandler) APIShortenHandler(w http.ResponseWriter, r *http.Reque
 	url := core.URL{}
 	shortURL := core.ShortenURL{}
 	ctx := context.TODO()
-
 	w, userKey := h.GetUserIdentity(w, r)
 	bodyBytes, _ := io.ReadAll(r.Body)
 	err := json.Unmarshal(bodyBytes, &url)
+
 	if err != nil {
 		log.Println("APIShortenHandler", err)
 		w.WriteHeader(http.StatusBadRequest)

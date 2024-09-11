@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"fmt"
+	"log"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
@@ -46,13 +47,13 @@ func (s postgresStorage) createTables(ctx context.Context) error {
 func (s postgresStorage) InsertUser(ctx context.Context, Key int) (*core.User, error) {
 	if Key == 0 {
 		sqlStatement := `
-		INSERT INTO Users (Name)
+		INSERT INTO public.Users (Name)
 		VALUES ($1)
 		RETURNING id`
 		var id int
 		err := s.DB.QueryRowContext(ctx, sqlStatement, "yandex").Scan(&id)
 		if err != nil {
-			fmt.Println("Ошибки при вставке в БД", err)
+			log.Println("Ошибки при вставке в БД", err)
 			return nil, err
 		}
 		return &core.User{Key: id}, nil
