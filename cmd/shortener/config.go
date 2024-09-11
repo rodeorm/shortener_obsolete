@@ -16,68 +16,50 @@ import (
 Если нет переменной окружения, но есть аргумент командной строки (флаг), то используется он.
 Если нет ни переменной окружения, ни флага, то используется значение по умолчанию.
 */
+//config выполняет первоначальную конфигурацию
 func config() *control.DecoratedHandler {
 	flag.Parse()
 
-	/*
-		serverAddress := "localhost:8080"                                                               //Адрес запуска HTTP-сервера
-		baseURL := "http://localhost:8080"                                                              //Базовый URL
-		fileStoragePath := "D:/file.txt"                                                                //Путь до файла
-		databaseConnectionString := "postgres://app:qqqQQQ123@localhost:5433/shortener?sslmode=disable" //Строка подключения к БД
-	*/
-	serverAddress := "localhost:8080"  //Адрес запуска HTTP-сервера
-	baseURL := "http://localhost:8080" //Базовый URL
-	fileStoragePath := ""              //Путь до файла
-	databaseConnectionString := ""     //Строка подключения к БД
+	// os.Setenv("SERVER_ADDRESS", "localhost:8080")
+	// os.Setenv("BASE_URL", "http://tiny")
+	// os.Setenv("FILE_STORAGE_PATH", "D:/file.txt")
+	// os.Setenv("DATABASE_DSN", "postgres://app:qqqQQQ123@localhost:5432/shortener?sslmode=disable")
 
-	if *a != "" {
-		serverAddress = *a
-	} else if os.Getenv("SERVER_ADDRESS") == "" {
+	var serverAddress, baseURL, fileStoragePath, databaseConnectionString string
+
+	//Адрес запуска HTTP-сервера
+	if *a == "" {
 		serverAddress = os.Getenv("SERVER_ADDRESS")
+		if serverAddress == "" {
+			serverAddress = "localhost:8080"
+		}
+	} else {
+		serverAddress = *a
 	}
 
-	if *b != "" {
-		baseURL = *b
-	} else if os.Getenv("BASE_URL") == "" {
+	//Базовый адрес результирующего сокращённого URL
+	if *b == "" {
 		baseURL = os.Getenv("BASE_URL")
+		if baseURL == "" {
+			baseURL = "http://localhost:8080"
+		}
+	} else {
+		baseURL = *b
 	}
 
-	if *f != "" {
-		fileStoragePath = *f
-	} else if os.Getenv("FILE_STORAGE_PATH") == "" {
+	//Путь до файла
+	if *f == "" {
 		fileStoragePath = os.Getenv("FILE_STORAGE_PATH")
+	} else {
+		fileStoragePath = *f
 	}
 
-	if *d != "" {
+	//Строка подключения к БД
+	if *d == "" {
 		databaseConnectionString = os.Getenv("DATABASE_DSN")
-	} else if os.Getenv("DATABASE_DSN") != "" {
+	} else {
 		databaseConnectionString = *d
 	}
 
-	/*
-		if os.Getenv("SERVER_ADDRESS") != "" {
-			serverAddress = os.Getenv("SERVER_ADDRESS")
-		} else if *a != "" {
-			serverAddress = *a
-		}
-
-		if os.Getenv("BASE_URL") != "" {
-			baseURL = os.Getenv("BASE_URL")
-		} else if *b != "" {
-			baseURL = *b
-		}
-
-		if os.Getenv("FILE_STORAGE_PATH") != "" {
-			fileStoragePath = os.Getenv("FILE_STORAGE_PATH")
-		} else if *f != "" {
-			fileStoragePath = *f
-		}
-
-		if os.Getenv("DATABASE_DSN") != "" {
-			databaseConnectionString = os.Getenv("DATABASE_DSN")
-		} else if *d != "" {
-			databaseConnectionString = *d
-		}
-	*/
 	return &control.DecoratedHandler{ServerAddress: serverAddress, Storage: repo.NewStorage(fileStoragePath, databaseConnectionString), BaseURL: baseURL}
 }
