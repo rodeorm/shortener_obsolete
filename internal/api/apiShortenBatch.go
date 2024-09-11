@@ -13,6 +13,7 @@ import (
 )
 
 func (h DecoratedHandler) APIShortenBatch(w http.ResponseWriter, r *http.Request) {
+	log.Println("APIShortenBatch")
 	var urlReq []core.URLWithCorrelationRequest
 	var urlRes []core.URLWithCorrelationResponse
 

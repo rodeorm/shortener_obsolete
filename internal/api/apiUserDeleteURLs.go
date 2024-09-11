@@ -16,6 +16,9 @@ APIUserDeleteURLsHandler принимает список идентификат�
 В случае успешного приёма запроса хендлер должен возвращать HTTP-статус 202 Accepted.
 */
 func (h DecoratedHandler) APIUserDeleteURLsHandler(w http.ResponseWriter, r *http.Request) {
+
+	log.Println("APIUserDeleteURLsHandler")
+
 	w, userKey := cookie.GetUserIdentity(h.Storage, w, r)
 
 	ctx := context.TODO()

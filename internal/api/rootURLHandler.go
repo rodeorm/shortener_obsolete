@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -14,6 +15,7 @@ RootURLHandler GET /{id} принимает в качестве URL-параме
 При запросе удалённого URL с помощью хендлера GET /{id} нужно вернуть статус 410 Gone
 */
 func (h DecoratedHandler) RootURLHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("RootURLHandler")
 	currentID := mux.Vars(r)["URL"]
 	ctx := context.TODO()
 

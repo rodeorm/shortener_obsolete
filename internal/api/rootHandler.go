@@ -12,6 +12,7 @@ import (
 
 // RootHandler POST принимает в теле запроса строку URL для сокращения и возвращает ответ с кодом 201 и сокращённым URL в виде текстовой строки в теле.
 func (h DecoratedHandler) RootHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("RootHandler")
 	w, userKey := cookie.GetUserIdentity(h.Storage, w, r)
 
 	ctx := context.TODO()

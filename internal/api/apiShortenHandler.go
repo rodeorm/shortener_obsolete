@@ -14,6 +14,9 @@ import (
 
 // APIShortenHandler принимает в теле запроса JSON-объект {"url":"<some_url>"} и возвращает в ответ объект {"result":"<shorten_url>"}.
 func (h DecoratedHandler) APIShortenHandler(w http.ResponseWriter, r *http.Request) {
+
+	log.Println("APIShortenHandler")
+
 	url := core.URL{}
 	shortURL := core.ShortenURL{}
 	ctx := context.TODO()

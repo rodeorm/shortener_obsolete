@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -13,6 +14,8 @@ import (
 /*APIUserGetURLsHandler возвращает пользователю все когда-либо сокращённые им URL в формате JSON*/
 func (h DecoratedHandler) APIUserGetURLsHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := context.TODO()
+
+	log.Println("APIUserGetURLsHandler")
 
 	w, userKey := cookie.GetUserIdentity(h.Storage, w, r)
 	userID, err := strconv.Atoi(userKey)
