@@ -45,6 +45,8 @@ func (s postgresStorage) createTables(ctx context.Context) error {
 
 // InsertUser сохраняет нового пользователя или возвращает уже имеющегося в наличии
 func (s postgresStorage) InsertUser(ctx context.Context, Key int) (*core.User, error) {
+
+	s.DB.QueryRowContext(ctx, "SELECT ID from Users WHERE ID = $1", fmt.Sprint(Key)).Scan(&Key)
 	if Key == 0 {
 		sqlStatement := `
 		INSERT INTO public.Users (Name)
@@ -56,9 +58,7 @@ func (s postgresStorage) InsertUser(ctx context.Context, Key int) (*core.User, e
 			log.Println("Ошибки при вставке в БД", err)
 			return nil, err
 		}
-		return &core.User{Key: id}, nil
 	}
-	s.DB.QueryRowContext(ctx, "SELECT ID from Users WHERE ID = $1", fmt.Sprint(Key)).Scan(&Key)
 
 	return &core.User{Key: Key}, nil
 }

@@ -13,6 +13,10 @@ import (
 func (h DecoratedHandler) GetUserIdentity(w http.ResponseWriter, r *http.Request) (http.ResponseWriter, string) {
 	ctx := context.TODO()
 	userKey, err := cookie.GetUserKeyFromCoockie(r)
+	if err != nil {
+		log.Println("GetUserIdentity", err)
+	}
+
 	key, _ := strconv.Atoi(userKey)
 	user, err := h.Storage.InsertUser(ctx, key)
 	if err != nil {
