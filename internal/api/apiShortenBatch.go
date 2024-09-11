@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/rodeorm/shortener/internal/api/cookie"
 	"github.com/rodeorm/shortener/internal/core"
 )
 
@@ -15,7 +16,7 @@ func (h DecoratedHandler) APIShortenBatch(w http.ResponseWriter, r *http.Request
 	var urlReq []core.URLWithCorrelationRequest
 	var urlRes []core.URLWithCorrelationResponse
 
-	w, userKey := h.GetUserIdentity(w, r)
+	w, userKey := cookie.GetUserIdentity(h.Storage, w, r)
 	bodyBytes, _ := io.ReadAll(r.Body)
 	err := json.Unmarshal(bodyBytes, &urlReq)
 	ctx := context.TODO()

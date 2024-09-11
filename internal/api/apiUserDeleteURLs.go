@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/rodeorm/shortener/internal/api/cookie"
 )
 
 /*
@@ -14,7 +16,7 @@ APIUserDeleteURLsHandler принимает список идентификат�
 В случае успешного приёма запроса хендлер должен возвращать HTTP-статус 202 Accepted.
 */
 func (h DecoratedHandler) APIUserDeleteURLsHandler(w http.ResponseWriter, r *http.Request) {
-	w, userKey := h.GetUserIdentity(w, r)
+	w, userKey := cookie.GetUserIdentity(h.Storage, w, r)
 
 	ctx := context.TODO()
 

@@ -6,13 +6,15 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/rodeorm/shortener/internal/api/cookie"
 )
 
 /*APIUserGetURLsHandler возвращает пользователю все когда-либо сокращённые им URL в формате JSON*/
 func (h DecoratedHandler) APIUserGetURLsHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := context.TODO()
 
-	w, userKey := h.GetUserIdentity(w, r)
+	w, userKey := cookie.GetUserIdentity(h.Storage, w, r)
 	userID, err := strconv.Atoi(userKey)
 	if err != nil {
 		fmt.Println("Проблемы с получением пользователя", err)
