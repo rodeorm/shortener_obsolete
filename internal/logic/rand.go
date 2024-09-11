@@ -14,7 +14,7 @@ func ReturnShortKey(n int) (string, error) {
 		err := fmt.Errorf("некорректное значение ключа %v", n)
 		return "", err
 	}
-	rand.Seed(time.Now().UnixNano())
+	rand.New(rand.NewSource(time.Now().UnixNano()))
 	b := make([]rune, n)
 	for i := range b {
 		b[i] = letters[rand.Intn(len(letters))]
