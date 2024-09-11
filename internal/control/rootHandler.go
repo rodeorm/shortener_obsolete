@@ -2,16 +2,16 @@ package control
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
-//RootHandler POST принимает в теле запроса строку URL для сокращения и возвращает ответ с кодом 201 и сокращённым URL в виде текстовой строки в теле.
+// RootHandler POST принимает в теле запроса строку URL для сокращения и возвращает ответ с кодом 201 и сокращённым URL в виде текстовой строки в теле.
 func (h DecoratedHandler) RootHandler(w http.ResponseWriter, r *http.Request) {
 
 	w, userKey := h.GetUserIdentity(w, r)
 
-	bodyBytes, _ := ioutil.ReadAll(r.Body)
+	bodyBytes, _ := io.ReadAll(r.Body)
 	bodyString := string(bodyBytes)
 	shortURLKey, isDuplicated, err := h.Storage.InsertURL(bodyString, h.BaseURL, userKey)
 	if err != nil {
