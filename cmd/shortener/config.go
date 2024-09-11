@@ -8,50 +8,45 @@ import (
 	"github.com/rodeorm/shortener/internal/repo"
 )
 
-// config выполняет первоначальную конфигурацию
+/*
+Сonfig выполняет первоначальную конфигурацию.
+
+Приоритет параметров сервера должен быть таким:
+Если указана переменная окружения, то используется она.
+Если нет переменной окружения, но есть аргумент командной строки (флаг), то используется он.
+Если нет ни переменной окружения, ни флага, то используется значение по умолчанию.
+*/
 func config() *control.DecoratedHandler {
 	flag.Parse()
 
-	/*
-		os.Setenv("SERVER_ADDRESS", "localhost:8080")
-		os.Setenv("BASE_URL", "http://tiny")
-		os.Setenv("FILE_STORAGE_PATH", "D:/file.txt")
-		os.Setenv("DATABASE_DSN", "postgres://app:qqqQQQ123@localhost:5433/shortener?sslmode=disable")
-	*/
+	var (
+		serverAddress            string = "localhost:8080"                                                    //Адрес запуска HTTP-сервера
+		baseURL                  string = "http://localhost:8080"                                             //Базовый URL
+		fileStoragePath          string = "D:/file.txt"                                                       //Путь до файла
+		databaseConnectionString string = "postgres://app:qqqQQQ123@localhost:5433/shortener?sslmode=disable" //Строка подключения к БД
+	)
 
-	var serverAddress, baseURL, fileStoragePath, databaseConnectionString string
-
-	//Адрес запуска HTTP-сервера
-	if *a == "" {
+	if os.Getenv("SERVER_ADDRESS") != "" {
 		serverAddress = os.Getenv("SERVER_ADDRESS")
-		if serverAddress == "" {
-			serverAddress = "localhost:8080"
-		}
-	} else {
+	} else if *a != "" {
 		serverAddress = *a
 	}
 
-	//Базовый адрес результирующего сокращённого URL
-	if *b == "" {
+	if os.Getenv("BASE_URL") != "" {
 		baseURL = os.Getenv("BASE_URL")
-		if baseURL == "" {
-			baseURL = "http://localhost:8080"
-		}
-	} else {
+	} else if *b != "" {
 		baseURL = *b
 	}
 
-	//Путь до файла
-	if *f == "" {
+	if os.Getenv("FILE_STORAGE_PATH") != "" {
 		fileStoragePath = os.Getenv("FILE_STORAGE_PATH")
-	} else {
+	} else if *f != "" {
 		fileStoragePath = *f
 	}
 
-	//Строка подключения к БД
-	if *d == "" {
+	if os.Getenv("DATABASE_DSN") != "" {
 		databaseConnectionString = os.Getenv("DATABASE_DSN")
-	} else {
+	} else if *d != "" {
 		databaseConnectionString = *d
 	}
 
