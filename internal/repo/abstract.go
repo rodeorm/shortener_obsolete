@@ -5,23 +5,24 @@ import (
 	"log"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/rodeorm/shortener/internal/core"
 )
 
 type AbstractStorage interface {
 	// InsertURL сохраняет соответствие между оригинальным и коротким адресом
-	InsertURL(URL, baseURL, userKey string) (string, bool, error)
+	InsertURL(ctx context.Context, URL, baseURL, userKey string) (string, bool, error)
 
 	// SelectOriginalURL возвращает оригинальный адрес на основании короткого; признак, что url ранее уже сокращался; признак, что url удален
-	SelectOriginalURL(shortURL string) (string, bool, bool, error)
+	SelectOriginalURL(ctx context.Context, shortURL string) (string, bool, bool, error)
 
 	//InsertUser сохраняет нового пользователя или возвращает уже имеющегося в наличии
-	InsertUser(Key int) (*User, error)
+	InsertUser(ctx context.Context, Key int) (*core.User, error)
 
 	// SelectUserURLHistory возвращает перечень соответствий между оригинальным и коротким адресом для конкретного пользователя
-	SelectUserURLHistory(Key int) (*[]UserURLPair, error)
+	SelectUserURLHistory(ctx context.Context, Key int) (*[]core.UserURLPair, error)
 
 	// Массово помечает URL как удаленные. Успешно удалить URL может только пользователь, его создавший.
-	DeleteURLs(URL, userKey string) (bool, error)
+	DeleteURLs(ctx context.Context, URL, userKey string) (bool, error)
 
 	// Закрыть соединение (только для СУБД)
 	CloseConnection()
@@ -55,16 +56,16 @@ func NewStorage(filePath, dbConnectionString string) AbstractStorage {
 func InitMemoryStorage() *memoryStorage {
 	ots := make(map[string]string)
 	sto := make(map[string]string)
-	usr := make(map[int]*User)
-	usrURL := make(map[int]*[]UserURLPair)
+	usr := make(map[int]*core.User)
+	usrURL := make(map[int]*[]core.UserURLPair)
 	storage := memoryStorage{originalToShort: ots, shortToOriginal: sto, users: usr, userURLPairs: usrURL}
 	return &storage
 }
 
 // InitFileStorage создает хранилище данных на файловой системе
 func InitFileStorage(filePath string) (*fileStorage, error) {
-	usr := make(map[int]*User)
-	usrURL := make(map[int]*[]UserURLPair)
+	usr := make(map[int]*core.User)
+	usrURL := make(map[int]*[]core.UserURLPair)
 	storage := fileStorage{filePath: filePath, users: usr, userURLPairs: usrURL}
 	err := storage.CheckFile(filePath)
 	if err != nil {

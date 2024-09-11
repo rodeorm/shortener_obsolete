@@ -1,4 +1,4 @@
-package logic
+package core
 
 import (
 	"crypto/aes"

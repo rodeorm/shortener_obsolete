@@ -1,4 +1,4 @@
-package control
+package api
 
 import (
 	"log"
@@ -7,11 +7,11 @@ import (
 
 	"github.com/gorilla/mux"
 
-	middleware "github.com/rodeorm/shortener/internal/control/middleware"
-	repo "github.com/rodeorm/shortener/internal/repo"
+	"github.com/rodeorm/shortener/internal/api/middleware"
+	"github.com/rodeorm/shortener/internal/repo"
 )
 
-//RouterStart запускает веб-сервер
+// RouterStart запускает веб-сервер
 func RouterStart(h *DecoratedHandler) error {
 
 	r := mux.NewRouter()

@@ -2,6 +2,7 @@ package repo
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,13 +10,13 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/rodeorm/shortener/internal/logic"
+	"github.com/rodeorm/shortener/internal/core"
 )
 
 type fileStorage struct {
 	filePath     string
-	users        map[int]*User
-	userURLPairs map[int]*[]UserURLPair
+	users        map[int]*core.User
+	userURLPairs map[int]*[]core.UserURLPair
 }
 
 func (s fileStorage) CheckFile(filePath string) error {
@@ -36,44 +37,45 @@ func (s fileStorage) CheckFile(filePath string) error {
 }
 
 // InsertShortURL принимает оригинальный URL, генерирует для него ключ и сохраняет соответствие оригинального URL и ключа (либо возвращает ранее созданный ключ)
-func (s fileStorage) InsertURL(URL, baseURL, userKey string) (string, bool, error) {
+func (s fileStorage) InsertURL(ctx context.Context, URL, baseURL, userKey string) (string, bool, error) {
 
-	if !logic.CheckURLValidity(URL) {
+	if !core.CheckURLValidity(URL) {
 		return "", false, fmt.Errorf("невалидный URL: %s", URL)
 	}
-	URL = logic.GetClearURL(URL, "")
-	key, isExist := s.getShortlURLFromFile(URL)
+	URL = core.GetClearURL(URL, "")
+	key, isExist := s.getShortlURLFromFile(ctx, URL)
 	if isExist {
 		return key, true, nil
 	}
-	key, _ = logic.ReturnShortKey(5)
+	key, _ = core.ReturnShortKey(5)
 
 	f, err := os.OpenFile(s.filePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0777)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
-	pair := URLPair{Origin: URL, Short: key}
+	pair := core.URLPair{Origin: URL, Short: key}
 	data, err := json.Marshal(pair)
 	if err != nil {
 		return "", false, err
 	}
-	s.insertUserURLPair(userKey, baseURL+"/"+key, URL)
+	s.insertUserURLPair(ctx, userKey, baseURL+"/"+key, URL)
 	data = append(data, '\n')
 	_, err = f.Write(data)
 	return key, false, err
 }
 
-//getShortlURLFromFile возвращает из файла сокращенный URL по оригинальному URL
-func (s fileStorage) getShortlURLFromFile(URL string) (string, bool) {
+// getShortlURLFromFile возвращает из файла сокращенный URL по оригинальному URL
+func (s fileStorage) getShortlURLFromFile(ctx context.Context, URL string) (string, bool) {
 
 	file, err := os.Open(s.filePath)
 	if err != nil {
+		ctx.Done()
 		log.Fatal(err)
 	}
 	defer file.Close()
 
-	var up URLPair
+	var up core.URLPair
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		json.Unmarshal(scanner.Bytes(), &up)
@@ -86,7 +88,7 @@ func (s fileStorage) getShortlURLFromFile(URL string) (string, bool) {
 }
 
 // SelectOriginalURL принимает на вход короткий URL (относительный, без имени домена), извлекает из него ключ и возвращает оригинальный URL из хранилища
-func (s fileStorage) SelectOriginalURL(shortURL string) (string, bool, bool, error) {
+func (s fileStorage) SelectOriginalURL(ctx context.Context, shortURL string) (string, bool, bool, error) {
 
 	file, err := os.Open(s.filePath)
 	if err != nil {
@@ -94,7 +96,7 @@ func (s fileStorage) SelectOriginalURL(shortURL string) (string, bool, bool, err
 	}
 	defer file.Close()
 
-	var up URLPair
+	var up core.URLPair
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		json.Unmarshal(scanner.Bytes(), &up)
@@ -107,34 +109,35 @@ func (s fileStorage) SelectOriginalURL(shortURL string) (string, bool, bool, err
 
 }
 
-//InsertUser сохраняет нового пользователя или возвращает уже имеющегося в наличии
-func (s fileStorage) InsertUser(Key int) (*User, error) {
+// InsertUser сохраняет нового пользователя или возвращает уже имеющегося в наличии
+func (s fileStorage) InsertUser(ctx context.Context, Key int) (*core.User, error) {
 	if Key == 0 {
-		user := &User{Key: s.getNextFreeKey()}
+		user := &core.User{Key: s.getNextFreeKey()}
 		s.users[user.Key] = user
 		return user, nil
 	}
 	user, isExist := s.users[Key]
 	if !isExist {
-		user = &User{Key: Key}
+		user = &core.User{Key: Key}
 		s.users[Key] = user
 	}
 	return user, nil
 }
 
-//InsertUserURLPair cохраняет информацию о том, что пользователь сокращал URL, если такой информации ранее не было
-func (s fileStorage) insertUserURLPair(userKey, shorten, origin string) error {
+// InsertUserURLPair cохраняет информацию о том, что пользователь сокращал URL, если такой информации ранее не было
+func (s fileStorage) insertUserURLPair(ctx context.Context, userKey, shorten, origin string) error {
 	userID, err := strconv.Atoi(userKey)
 	if err != nil {
+		ctx.Done()
 		return fmt.Errorf("ошибка обработки идентификатора пользователя: %s", err)
 	}
 
-	URLPair := &UserURLPair{UserKey: userID, Short: shorten, Origin: origin}
+	URLPair := &core.UserURLPair{UserKey: userID, Short: shorten, Origin: origin}
 
 	userURLPairs, isExist := s.userURLPairs[URLPair.UserKey]
 	if !isExist {
 		userURLPair := *URLPair
-		new := make([]UserURLPair, 0, 10)
+		new := make([]core.UserURLPair, 0, 10)
 		new = append(new, userURLPair)
 		s.userURLPairs[URLPair.UserKey] = &new
 		return nil
@@ -155,7 +158,7 @@ func (s fileStorage) insertUserURLPair(userKey, shorten, origin string) error {
 	return nil
 }
 
-func (s fileStorage) SelectUserByKey(Key int) (*User, error) {
+func (s fileStorage) SelectUserByKey(Key int) (*core.User, error) {
 	user, isExist := s.users[Key]
 	if !isExist {
 		return nil, fmt.Errorf("нет пользователя с ключом: %d", Key)
@@ -163,15 +166,15 @@ func (s fileStorage) SelectUserByKey(Key int) (*User, error) {
 	return user, nil
 }
 
-//SelectUserURL возвращает перечень соответствий между оригинальным и коротким адресом для конкретного пользователя
-func (s fileStorage) SelectUserURLHistory(Key int) (*[]UserURLPair, error) {
+// SelectUserURL возвращает перечень соответствий между оригинальным и коротким адресом для конкретного пользователя
+func (s fileStorage) SelectUserURLHistory(ctx context.Context, Key int) (*[]core.UserURLPair, error) {
 	if s.userURLPairs[Key] == nil {
 		return nil, fmt.Errorf("нет истории")
 	}
 	return s.userURLPairs[Key], nil
 }
 
-//getNextFreeKey возвращает ближайший свободный идентификатор пользователя
+// getNextFreeKey возвращает ближайший свободный идентификатор пользователя
 func (s fileStorage) getNextFreeKey() int {
 	var maxNumber int
 	for maxNumber = range s.users {
@@ -189,6 +192,6 @@ func (s fileStorage) CloseConnection() {
 	fmt.Println("Закрыто")
 }
 
-func (s fileStorage) DeleteURLs(URL, userKey string) (bool, error) {
+func (s fileStorage) DeleteURLs(ctx context.Context, URL, userKey string) (bool, error) {
 	return true, nil
 }

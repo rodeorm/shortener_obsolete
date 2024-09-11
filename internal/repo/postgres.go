@@ -3,11 +3,10 @@ package repo
 import (
 	"context"
 	"fmt"
-	"sync"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
-	"github.com/rodeorm/shortener/internal/logic"
+	"github.com/rodeorm/shortener/internal/core"
 )
 
 type postgresStorage struct {
@@ -44,47 +43,40 @@ func (s postgresStorage) createTables(ctx context.Context) error {
 }
 
 // InsertUser сохраняет нового пользователя или возвращает уже имеющегося в наличии
-func (s postgresStorage) InsertUser(Key int) (*User, error) {
-	ctx := context.TODO()
-
+func (s postgresStorage) InsertUser(ctx context.Context, Key int) (*core.User, error) {
 	if Key == 0 {
 		sqlStatement := `
 		INSERT INTO Users (Name)
 		VALUES ($1)
 		RETURNING id`
-		id := 0
+		var id int
 		err := s.DB.QueryRowContext(ctx, sqlStatement, "yandex").Scan(&id)
 		if err != nil {
 			fmt.Println("Ошибки при вставке в БД", err)
 			return nil, err
 		}
-		return &User{Key: id}, nil
+		return &core.User{Key: id}, nil
 	}
-	var key int
-	s.DB.QueryRowContext(ctx, "SELECT ID from Users WHERE ID = $1", fmt.Sprint(Key)).Scan(&key)
+	s.DB.QueryRowContext(ctx, "SELECT ID from Users WHERE ID = $1", fmt.Sprint(Key)).Scan(&Key)
 
-	return &User{Key: key}, nil
+	return &core.User{Key: Key}, nil
 }
 
 // InsertShortURL принимает оригинальный URL, генерирует для него ключ, сохраняет соответствие оригинального URL и ключа и возвращает ключ (либо возвращает ранее созданный ключ)
-func (s postgresStorage) InsertURL(URL, baseURL, userKey string) (string, bool, error) {
-	if !logic.CheckURLValidity(URL) {
-
+func (s postgresStorage) InsertURL(ctx context.Context, URL, baseURL, userKey string) (string, bool, error) {
+	if !core.CheckURLValidity(URL) {
 		return "", false, fmt.Errorf("невалидный URL: %s", URL)
 	}
-
-	ctx := context.TODO()
 
 	var short string
 
 	// Проверяем на то, что ранее пользователь не сокращал URL
-	//s.DB.QueryRowContext(ctx, "SELECT short from Urls WHERE UserID = $1 AND original = $2", userKey, URL).Scan(&short)
 	s.DB.QueryRowContext(ctx, "SELECT short from Urls WHERE original = $1", URL).Scan(&short)
 	if short != "" {
 		return short, true, nil
 	}
 	// Вставляем новый URL
-	shortKey, err := logic.ReturnShortKey(5)
+	shortKey, err := core.ReturnShortKey(5)
 	if err != nil {
 		fmt.Println(err)
 		return "", false, err
@@ -101,8 +93,7 @@ func (s postgresStorage) InsertURL(URL, baseURL, userKey string) (string, bool, 
 	return shortKey, false, nil
 }
 
-func (s postgresStorage) SelectOriginalURL(shortURL string) (string, bool, bool, error) {
-	ctx := context.TODO()
+func (s postgresStorage) SelectOriginalURL(ctx context.Context, shortURL string) (string, bool, bool, error) {
 	var (
 		original  string
 		isDeleted bool
@@ -124,9 +115,8 @@ func (s postgresStorage) SelectOriginalURL(shortURL string) (string, bool, bool,
 }
 
 // SelectUserURLHistory возвращает перечень соответствий между оригинальным и коротким адресом для конкретного пользователя
-func (s postgresStorage) SelectUserURLHistory(Key int) (*[]UserURLPair, error) {
-	urls := make([]UserURLPair, 0, 1)
-	ctx := context.TODO()
+func (s postgresStorage) SelectUserURLHistory(ctx context.Context, Key int) (*[]core.UserURLPair, error) {
+	urls := make([]core.UserURLPair, 0, 1)
 	rows, err := s.DB.QueryContext(ctx, "SELECT original, short, userID FROM Urls WHERE UserID = $1", fmt.Sprint(Key))
 	if err != nil {
 		return nil, err
@@ -139,7 +129,7 @@ func (s postgresStorage) SelectUserURLHistory(Key int) (*[]UserURLPair, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var pair UserURLPair
+		var pair core.UserURLPair
 
 		err = rows.Scan(&pair.Origin, &pair.Short, &Key)
 		if err != nil {
@@ -158,10 +148,10 @@ func (s postgresStorage) CloseConnection() {
 	s.DB.Close()
 }
 
-func (s postgresStorage) DeleteURLs(URL, userKey string) (bool, error) {
+func (s postgresStorage) DeleteURLs(ctx context.Context, URL, userKey string) (bool, error) {
 	ch := make(chan string)
 
-	urls := logic.GetSliceFromString(URL)
+	urls := core.GetSliceFromString(URL)
 
 	go func() {
 		for _, url := range urls {
@@ -171,14 +161,13 @@ func (s postgresStorage) DeleteURLs(URL, userKey string) (bool, error) {
 	}()
 
 	for v := range makeDeletePool(ch) {
-		go s.deleteURL(v, userKey)
+		go s.deleteURL(ctx, v, userKey)
 	}
 
 	return true, nil
 }
 
-func (s postgresStorage) deleteURL(url, userKey string) (bool, error) {
-	ctx := context.TODO()
+func (s postgresStorage) deleteURL(ctx context.Context, url, userKey string) (bool, error) {
 	tx, err := s.DB.Begin()
 
 	if err != nil {
@@ -201,28 +190,4 @@ func (s postgresStorage) deleteURL(url, userKey string) (bool, error) {
 		return false, err
 	}
 	return true, nil
-}
-
-func makeDeletePool(inputChs ...chan string) chan string {
-	outCh := make(chan string)
-
-	go func() {
-		wg := &sync.WaitGroup{}
-
-		for _, inputCh := range inputChs {
-			wg.Add(1)
-
-			go func(inputCh chan string) {
-				defer wg.Done()
-				for item := range inputCh {
-					outCh <- item
-				}
-			}(inputCh)
-		}
-
-		wg.Wait()
-		close(outCh)
-	}()
-
-	return outCh
 }

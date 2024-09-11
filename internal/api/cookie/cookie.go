@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/rodeorm/shortener/internal/logic"
+	"github.com/rodeorm/shortener/internal/core"
 )
-
 
 func GetUserKeyFromCoockie(r *http.Request) (string, error) {
 	tokenCookie, err := r.Cookie("token")
@@ -16,7 +15,7 @@ func GetUserKeyFromCoockie(r *http.Request) (string, error) {
 	if tokenCookie.Value == "" {
 		return "", fmt.Errorf("не найдено актуальных cookie")
 	}
-	userKey, err := logic.Decrypt(tokenCookie.Value)
+	userKey, err := core.Decrypt(tokenCookie.Value)
 	if err != nil {
 		return "", err
 	}
@@ -24,7 +23,7 @@ func GetUserKeyFromCoockie(r *http.Request) (string, error) {
 }
 
 func PutUserKeyToCookie(Key string) *http.Cookie {
-	val, _ := logic.Encrypt(Key)
+	val, _ := core.Encrypt(Key)
 
 	cookie := &http.Cookie{
 		Name:   "token",

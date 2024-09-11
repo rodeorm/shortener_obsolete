@@ -1,6 +1,7 @@
-package control
+package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,6 +10,8 @@ import (
 
 /*APIUserGetURLsHandler возвращает пользователю все когда-либо сокращённые им URL в формате JSON*/
 func (h DecoratedHandler) APIUserGetURLsHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := context.TODO()
+
 	w, userKey := h.GetUserIdentity(w, r)
 	userID, err := strconv.Atoi(userKey)
 	if err != nil {
@@ -16,7 +19,7 @@ func (h DecoratedHandler) APIUserGetURLsHandler(w http.ResponseWriter, r *http.R
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-	URLHistory, err := h.Storage.SelectUserURLHistory(userID)
+	URLHistory, err := h.Storage.SelectUserURLHistory(ctx, userID)
 	if err != nil {
 		fmt.Println("Проблемы с получением истории пользователя", err)
 		w.WriteHeader(http.StatusNoContent)

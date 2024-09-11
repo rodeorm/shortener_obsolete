@@ -1,31 +1,34 @@
-package control
+package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
-	repo "github.com/rodeorm/shortener/internal/repo"
+	"github.com/rodeorm/shortener/internal/core"
 )
 
 // APIShortenHandler принимает в теле запроса JSON-объект {"url":"<some_url>"} и возвращает в ответ объект {"result":"<shorten_url>"}.
 func (h DecoratedHandler) APIShortenHandler(w http.ResponseWriter, r *http.Request) {
-	url := repo.URL{}
-	shortURL := repo.ShortenURL{}
+	url := core.URL{}
+	shortURL := core.ShortenURL{}
+	ctx := context.TODO()
 
 	w, userKey := h.GetUserIdentity(w, r)
 	bodyBytes, _ := io.ReadAll(r.Body)
 	err := json.Unmarshal(bodyBytes, &url)
 	if err != nil {
-		fmt.Println(err)
+		log.Println("APIShortenHandler", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	shortURLKey, isDuplicated, err := h.Storage.InsertURL(url.Key, h.BaseURL, userKey)
+	shortURLKey, isDuplicated, err := h.Storage.InsertURL(ctx, url.Key, h.BaseURL, userKey)
 	if err != nil {
-		fmt.Println(err)
+		log.Println("APIShortenHandler", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -39,7 +42,7 @@ func (h DecoratedHandler) APIShortenHandler(w http.ResponseWriter, r *http.Reque
 
 	bodyBytes, err = json.Marshal(shortURL)
 	if err != nil {
-		fmt.Println(err)
+		log.Println("APIShortenHandler", err)
 	}
 	fmt.Fprint(w, string(bodyBytes))
 }

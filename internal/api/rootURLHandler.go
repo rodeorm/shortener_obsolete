@@ -1,6 +1,7 @@
-package control
+package api
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -14,7 +15,9 @@ RootURLHandler GET /{id} принимает в качестве URL-параме
 */
 func (h DecoratedHandler) RootURLHandler(w http.ResponseWriter, r *http.Request) {
 	currentID := mux.Vars(r)["URL"]
-	originalURL, isExist, isDeleted, _ := h.Storage.SelectOriginalURL(currentID)
+	ctx := context.TODO()
+
+	originalURL, isExist, isDeleted, _ := h.Storage.SelectOriginalURL(ctx, currentID)
 	if isDeleted {
 		w.WriteHeader(http.StatusGone)
 		return
