@@ -2,23 +2,23 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	cookie "github.com/rodeorm/shortener/internal/api/cookie"
 )
 
 // GetUserIdentity определяет по кукам какой пользователь авторизовался, если куки некорректные, то создает новые
 func (h DecoratedHandler) GetUserIdentity(w http.ResponseWriter, r *http.Request) (http.ResponseWriter, string) {
-	userKey, err := cookie.GetUserKeyFromCoockie(r)
 	ctx := context.TODO()
-
-	user, err := h.Storage.InsertUser(ctx, 0)
+	userKey, err := cookie.GetUserKeyFromCoockie(r)
+	key, _ := strconv.Atoi(userKey)
+	user, err := h.Storage.InsertUser(ctx, key)
 	if err != nil {
 		log.Println("GetUserIdentity", err)
 	}
-	userKey = fmt.Sprint(user.Key)
-	http.SetCookie(w, cookie.PutUserKeyToCookie(userKey))
+
+	http.SetCookie(w, cookie.PutUserKeyToCookie(strconv.Itoa(user.Key)))
 	return w, userKey
 }
