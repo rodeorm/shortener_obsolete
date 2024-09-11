@@ -4,9 +4,18 @@ import (
 	"flag"
 	"os"
 
+	env "github.com/caarlos0/env/v6"
+
 	"github.com/rodeorm/shortener/internal/api"
 	"github.com/rodeorm/shortener/internal/repo"
 )
+
+type Config struct {
+	serverAddress   string `env:"SERVER_ADDRESS"`    //Адрес запуска HTTP-сервера
+	baseURL         string `env:"BASE_URL"`          //Базовый адрес результирующего сокращённого URL
+	fileStoragePath string `env:"FILE_STORAGE_PATH"` //Путь до файла
+	databaseDSN     string `env:"DATABASE_DSN"`      //Строка подключения к БД
+}
 
 /*
 Сonfig выполняет первоначальную конфигурацию.
@@ -18,48 +27,32 @@ import (
 */
 //config выполняет первоначальную конфигурацию
 func config() *api.DecoratedHandler {
-	flag.Parse()
 
 	os.Setenv("SERVER_ADDRESS", "localhost:8080")
 	os.Setenv("BASE_URL", "http://tiny")
 	os.Setenv("FILE_STORAGE_PATH", "D:/file.txt")
 	os.Setenv("DATABASE_DSN", "postgres://app:qqqQQQ123@localhost:5433/shortener?sslmode=disable")
 
-	var serverAddress, baseURL, fileStoragePath, databaseConnectionString string
+	var cfg Config
 
-	//Адрес запуска HTTP-сервера
-	if *a == "" {
-		serverAddress = os.Getenv("SERVER_ADDRESS")
-		if serverAddress == "" {
-			serverAddress = "localhost:8080"
-		}
-	} else {
-		serverAddress = *a
+	flag.Parse()
+	env.Parse(&cfg)
+
+	if *a != "" {
+		cfg.serverAddress = *a
 	}
 
-	//Базовый адрес результирующего сокращённого URL
-	if *b == "" {
-		baseURL = os.Getenv("BASE_URL")
-		if baseURL == "" {
-			baseURL = "http://localhost:8080"
-		}
-	} else {
-		baseURL = *b
+	if *b != "" {
+		cfg.baseURL = *b
 	}
 
-	//Путь до файла
-	if *f == "" {
-		fileStoragePath = os.Getenv("FILE_STORAGE_PATH")
-	} else {
-		fileStoragePath = *f
+	if *f != "" {
+		cfg.fileStoragePath = *f
 	}
 
-	//Строка подключения к БД
-	if *d == "" {
-		databaseConnectionString = os.Getenv("DATABASE_DSN")
-	} else {
-		databaseConnectionString = *d
+	if *d != "" {
+		cfg.databaseDSN = *d
 	}
 
-	return &api.DecoratedHandler{ServerAddress: serverAddress, Storage: repo.NewStorage(fileStoragePath, databaseConnectionString), BaseURL: baseURL}
+	return &api.DecoratedHandler{ServerAddress: cfg.serverAddress, Storage: repo.NewStorage(cfg.fileStoragePath, cfg.databaseDSN), BaseURL: cfg.baseURL}
 }
