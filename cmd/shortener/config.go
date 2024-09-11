@@ -19,34 +19,65 @@ import (
 func config() *control.DecoratedHandler {
 	flag.Parse()
 
-	serverAddress := "localhost:8080"                                                               //Адрес запуска HTTP-сервера
-	baseURL := "http://localhost:8080"                                                              //Базовый URL
-	fileStoragePath := "D:/file.txt"                                                                //Путь до файла
-	databaseConnectionString := "postgres://app:qqqQQQ123@localhost:5433/shortener?sslmode=disable" //Строка подключения к БД
+	/*
+		serverAddress := "localhost:8080"                                                               //Адрес запуска HTTP-сервера
+		baseURL := "http://localhost:8080"                                                              //Базовый URL
+		fileStoragePath := "D:/file.txt"                                                                //Путь до файла
+		databaseConnectionString := "postgres://app:qqqQQQ123@localhost:5433/shortener?sslmode=disable" //Строка подключения к БД
+	*/
+	serverAddress := "localhost:8080"  //Адрес запуска HTTP-сервера
+	baseURL := "http://localhost:8080" //Базовый URL
+	fileStoragePath := ""              //Путь до файла
+	databaseConnectionString := ""     //Строка подключения к БД
 
-	if os.Getenv("SERVER_ADDRESS") != "" {
-		serverAddress = os.Getenv("SERVER_ADDRESS")
-	} else if *a != "" {
+	if *a != "" {
 		serverAddress = *a
+	} else if os.Getenv("SERVER_ADDRESS") == "" {
+		serverAddress = os.Getenv("SERVER_ADDRESS")
 	}
 
-	if os.Getenv("BASE_URL") != "" {
-		baseURL = os.Getenv("BASE_URL")
-	} else if *b != "" {
+	if *b != "" {
 		baseURL = *b
+	} else if os.Getenv("BASE_URL") == "" {
+		baseURL = os.Getenv("BASE_URL")
 	}
 
-	if os.Getenv("FILE_STORAGE_PATH") != "" {
-		fileStoragePath = os.Getenv("FILE_STORAGE_PATH")
-	} else if *f != "" {
+	if *f != "" {
 		fileStoragePath = *f
+	} else if os.Getenv("FILE_STORAGE_PATH") == "" {
+		fileStoragePath = os.Getenv("FILE_STORAGE_PATH")
 	}
 
-	if os.Getenv("DATABASE_DSN") != "" {
+	if *d != "" {
 		databaseConnectionString = os.Getenv("DATABASE_DSN")
-	} else if *d != "" {
+	} else if os.Getenv("DATABASE_DSN") != "" {
 		databaseConnectionString = *d
 	}
 
+	/*
+		if os.Getenv("SERVER_ADDRESS") != "" {
+			serverAddress = os.Getenv("SERVER_ADDRESS")
+		} else if *a != "" {
+			serverAddress = *a
+		}
+
+		if os.Getenv("BASE_URL") != "" {
+			baseURL = os.Getenv("BASE_URL")
+		} else if *b != "" {
+			baseURL = *b
+		}
+
+		if os.Getenv("FILE_STORAGE_PATH") != "" {
+			fileStoragePath = os.Getenv("FILE_STORAGE_PATH")
+		} else if *f != "" {
+			fileStoragePath = *f
+		}
+
+		if os.Getenv("DATABASE_DSN") != "" {
+			databaseConnectionString = os.Getenv("DATABASE_DSN")
+		} else if *d != "" {
+			databaseConnectionString = *d
+		}
+	*/
 	return &control.DecoratedHandler{ServerAddress: serverAddress, Storage: repo.NewStorage(fileStoragePath, databaseConnectionString), BaseURL: baseURL}
 }
