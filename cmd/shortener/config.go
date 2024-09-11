@@ -19,12 +19,10 @@ import (
 func config() *control.DecoratedHandler {
 	flag.Parse()
 
-	var (
-		serverAddress            string = "localhost:8080"                                                    //Адрес запуска HTTP-сервера
-		baseURL                  string = "http://localhost:8080"                                             //Базовый URL
-		fileStoragePath          string = "D:/file.txt"                                                       //Путь до файла
-		databaseConnectionString string = "postgres://app:qqqQQQ123@localhost:5433/shortener?sslmode=disable" //Строка подключения к БД
-	)
+	serverAddress := "localhost:8080"                                                               //Адрес запуска HTTP-сервера
+	baseURL := "http://localhost:8080"                                                              //Базовый URL
+	fileStoragePath := "D:/file.txt"                                                                //Путь до файла
+	databaseConnectionString := "postgres://app:qqqQQQ123@localhost:5433/shortener?sslmode=disable" //Строка подключения к БД
 
 	if os.Getenv("SERVER_ADDRESS") != "" {
 		serverAddress = os.Getenv("SERVER_ADDRESS")
