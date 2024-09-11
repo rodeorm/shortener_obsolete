@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"os"
 
 	env "github.com/caarlos0/env/v6"
 
@@ -28,11 +27,12 @@ type Config struct {
 //config выполняет первоначальную конфигурацию
 func config() *api.DecoratedHandler {
 
-	os.Setenv("SERVER_ADDRESS", "localhost:8080")
-	os.Setenv("BASE_URL", "http://tiny")
-	os.Setenv("FILE_STORAGE_PATH", "D:/file.txt")
-	os.Setenv("DATABASE_DSN", "postgres://app:qqqQQQ123@localhost:5433/shortener?sslmode=disable")
-
+	/*
+		os.Setenv("SERVER_ADDRESS", "localhost:8080")
+		os.Setenv("BASE_URL", "http://tiny")
+		os.Setenv("FILE_STORAGE_PATH", "D:/file.txt")
+		os.Setenv("DATABASE_DSN", "postgres://app:qqqQQQ123@localhost:5433/shortener?sslmode=disable")
+	*/
 	var cfg Config
 
 	flag.Parse()
