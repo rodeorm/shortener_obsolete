@@ -1,6 +1,6 @@
 module github.com/rodeorm/shortener
 
-go 1.23.0
+go 1.22.7
 
 require (
 	github.com/gorilla/mux v1.8.1
