@@ -33,7 +33,8 @@ func config() *api.DecoratedHandler {
 		os.Setenv("FILE_STORAGE_PATH", "D:/file.txt")
 		os.Setenv("DATABASE_DSN", "postgres://app:qqqQQQ123@localhost:5433/shortener?sslmode=disable")
 	*/
-	var cfg Config
+
+	cfg := Config{}
 
 	flag.Parse()
 	env.Parse(&cfg)
@@ -52,6 +53,14 @@ func config() *api.DecoratedHandler {
 
 	if *d != "" {
 		cfg.databaseDSN = *d
+	}
+
+	if cfg.baseURL == "" {
+		cfg.baseURL = "http://localhost:8080"
+	}
+
+	if cfg.serverAddress == "" {
+		cfg.serverAddress = "localhost:8080"
 	}
 
 	return &api.DecoratedHandler{ServerAddress: cfg.serverAddress, Storage: repo.NewStorage(cfg.fileStoragePath, cfg.databaseDSN), BaseURL: cfg.baseURL}
