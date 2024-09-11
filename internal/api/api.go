@@ -26,7 +26,7 @@ func RouterStart(h *DecoratedHandler) error {
 
 	r.HandleFunc("/", h.BadRequestHandler)
 	r.Use(middleware.GzipMiddleware)
-	r.Use(middleware.LogMiddleware)
+	// r.Use(middleware.LogMiddleware)
 	srv := &http.Server{
 		Handler:      r,
 		Addr:         h.ServerAddress,
