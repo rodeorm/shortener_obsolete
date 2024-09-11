@@ -8,14 +8,16 @@ import (
 	"github.com/rodeorm/shortener/internal/repo"
 )
 
-//config выполняет первоначальную конфигурацию
+// config выполняет первоначальную конфигурацию
 func config() *control.DecoratedHandler {
 	flag.Parse()
 
-	// os.Setenv("SERVER_ADDRESS", "localhost:8080")
-	// os.Setenv("BASE_URL", "http://tiny")
-	// os.Setenv("FILE_STORAGE_PATH", "D:/file.txt")
-	// os.Setenv("DATABASE_DSN", "postgres://app:qqqQQQ123@localhost:5432/shortener?sslmode=disable")
+	/*
+		os.Setenv("SERVER_ADDRESS", "localhost:8080")
+		os.Setenv("BASE_URL", "http://tiny")
+		os.Setenv("FILE_STORAGE_PATH", "D:/file.txt")
+		os.Setenv("DATABASE_DSN", "postgres://app:qqqQQQ123@localhost:5433/shortener?sslmode=disable")
+	*/
 
 	var serverAddress, baseURL, fileStoragePath, databaseConnectionString string
 

@@ -2,7 +2,9 @@ package repo
 
 import (
 	"context"
-	"database/sql"
+	"log"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type AbstractStorage interface {
@@ -31,20 +33,25 @@ func NewStorage(filePath, dbConnectionString string) AbstractStorage {
 
 	storage, err := InitPostgresStorage(dbConnectionString)
 	if err == nil {
+		log.Println("Данные хранятся в Postgres: ", dbConnectionString)
 		return storage
+	} else {
+		log.Println("Ошибка при попытке подключения к Postgress: ", err, "Строка подключения: ", dbConnectionString)
 	}
 
 	if filePath != "" {
 		storage, err = InitFileStorage(filePath)
 		if err == nil {
+			log.Println("Данные хранятся в файле: ", filePath)
 			return storage
 		}
 	}
+	log.Println("Данные хранятся в памяти")
 	storage = InitMemoryStorage()
 	return storage
 }
 
-//InitMemoryStorage создает хранилище данных в оперативной памяти
+// InitMemoryStorage создает хранилище данных в оперативной памяти
 func InitMemoryStorage() *memoryStorage {
 	ots := make(map[string]string)
 	sto := make(map[string]string)
@@ -54,7 +61,7 @@ func InitMemoryStorage() *memoryStorage {
 	return &storage
 }
 
-//InitFileStorage создает хранилище данных на файловой системе
+// InitFileStorage создает хранилище данных на файловой системе
 func InitFileStorage(filePath string) (*fileStorage, error) {
 	usr := make(map[int]*User)
 	usrURL := make(map[int]*[]UserURLPair)
@@ -66,9 +73,9 @@ func InitFileStorage(filePath string) (*fileStorage, error) {
 	return &storage, nil
 }
 
-//InitPostgresStorage создает хранилище данных в БД на экземпляре Postgres
+// InitPostgresStorage создает хранилище данных в БД на экземпляре Postgres
 func InitPostgresStorage(connectionString string) (*postgresStorage, error) {
-	db, err := sql.Open("postgres", connectionString)
+	db, err := sqlx.Open("pgx", connectionString)
 	if err != nil {
 		return nil, err
 	}
@@ -78,8 +85,12 @@ func InitPostgresStorage(connectionString string) (*postgresStorage, error) {
 		return nil, err
 	}
 	delQueue := make(chan string)
+
 	storage := postgresStorage{DB: db, ConnectionString: connectionString, deleteQueue: delQueue}
-	storage.createTables(ctx)
+	err = storage.createTables(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	return &storage, nil
 }
