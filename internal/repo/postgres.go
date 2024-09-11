@@ -2,16 +2,17 @@ package repo
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"sync"
 
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jmoiron/sqlx"
+
 	"github.com/rodeorm/shortener/internal/logic"
 )
 
 type postgresStorage struct {
-	DB               *sql.DB     // Драйвер подключения к СУБД
+	DB               *sqlx.DB    // Драйвер подключения к СУБД
 	DBName           string      // Имя БД из конфиг.файла
 	ConnectionString string      // Строка подключения из конфиг.файла
 	deleteQueue      chan string // канал для удаления URL
@@ -43,7 +44,7 @@ func (s postgresStorage) createTables(ctx context.Context) error {
 	return nil
 }
 
-//InsertUser сохраняет нового пользователя или возвращает уже имеющегося в наличии
+// InsertUser сохраняет нового пользователя или возвращает уже имеющегося в наличии
 func (s postgresStorage) InsertUser(Key int) (*User, error) {
 	ctx := context.TODO()
 
@@ -66,7 +67,7 @@ func (s postgresStorage) InsertUser(Key int) (*User, error) {
 	return &User{Key: key}, nil
 }
 
-//InsertShortURL принимает оригинальный URL, генерирует для него ключ, сохраняет соответствие оригинального URL и ключа и возвращает ключ (либо возвращает ранее созданный ключ)
+// InsertShortURL принимает оригинальный URL, генерирует для него ключ, сохраняет соответствие оригинального URL и ключа и возвращает ключ (либо возвращает ранее созданный ключ)
 func (s postgresStorage) InsertURL(URL, baseURL, userKey string) (string, bool, error) {
 	if !logic.CheckURLValidity(URL) {
 
@@ -123,7 +124,7 @@ func (s postgresStorage) SelectOriginalURL(shortURL string) (string, bool, bool,
 	return "", false, false, nil
 }
 
-//SelectUserURLHistory возвращает перечень соответствий между оригинальным и коротким адресом для конкретного пользователя
+// SelectUserURLHistory возвращает перечень соответствий между оригинальным и коротким адресом для конкретного пользователя
 func (s postgresStorage) SelectUserURLHistory(Key int) (*[]UserURLPair, error) {
 	urls := make([]UserURLPair, 0, 1)
 	ctx := context.TODO()
