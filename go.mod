@@ -1,15 +1,15 @@
 module github.com/rodeorm/shortener
 
-go 1.22.7
+go 1.23.0
 
 require (
-	github.com/gorilla/mux v1.8.0
-	github.com/lib/pq v1.10.5
-	github.com/stretchr/testify v1.7.1
+	github.com/gorilla/mux v1.8.1
+	github.com/lib/pq v1.10.9
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
