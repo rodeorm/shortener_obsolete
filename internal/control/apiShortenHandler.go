@@ -3,7 +3,7 @@ package control
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	repo "github.com/rodeorm/shortener/internal/repo"
@@ -15,7 +15,7 @@ func (h DecoratedHandler) APIShortenHandler(w http.ResponseWriter, r *http.Reque
 	shortURL := repo.ShortenURL{}
 
 	w, userKey := h.GetUserIdentity(w, r)
-	bodyBytes, _ := ioutil.ReadAll(r.Body)
+	bodyBytes, _ := io.ReadAll(r.Body)
 	err := json.Unmarshal(bodyBytes, &url)
 	if err != nil {
 		fmt.Println(err)

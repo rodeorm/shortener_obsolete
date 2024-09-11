@@ -5,7 +5,6 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -25,12 +24,12 @@ func GzipMiddleware(next http.Handler) http.Handler {
 		}
 		defer gz.Close()
 
-		bodyBytes, _ := ioutil.ReadAll(r.Body)
+		bodyBytes, _ := io.ReadAll(r.Body)
 		if IsGzip(r.Header) {
 			bodyBytes, _ = DecompressGzip(bodyBytes)
 		}
 
-		r.Body = ioutil.NopCloser(strings.NewReader(string(bodyBytes)))
+		r.Body = io.NopCloser(strings.NewReader(string(bodyBytes)))
 
 		w.Header().Set("Content-Encoding", "gzip")
 		next.ServeHTTP(gzipWriter{ResponseWriter: w, Writer: gz}, r)

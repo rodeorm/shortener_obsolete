@@ -2,7 +2,8 @@ package repo
 
 import (
 	"context"
-	"database/sql"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type AbstractStorage interface {
@@ -44,7 +45,7 @@ func NewStorage(filePath, dbConnectionString string) AbstractStorage {
 	return storage
 }
 
-//InitMemoryStorage создает хранилище данных в оперативной памяти
+// InitMemoryStorage создает хранилище данных в оперативной памяти
 func InitMemoryStorage() *memoryStorage {
 	ots := make(map[string]string)
 	sto := make(map[string]string)
@@ -54,7 +55,7 @@ func InitMemoryStorage() *memoryStorage {
 	return &storage
 }
 
-//InitFileStorage создает хранилище данных на файловой системе
+// InitFileStorage создает хранилище данных на файловой системе
 func InitFileStorage(filePath string) (*fileStorage, error) {
 	usr := make(map[int]*User)
 	usrURL := make(map[int]*[]UserURLPair)
@@ -66,9 +67,9 @@ func InitFileStorage(filePath string) (*fileStorage, error) {
 	return &storage, nil
 }
 
-//InitPostgresStorage создает хранилище данных в БД на экземпляре Postgres
+// InitPostgresStorage создает хранилище данных в БД на экземпляре Postgres
 func InitPostgresStorage(connectionString string) (*postgresStorage, error) {
-	db, err := sql.Open("postgres", connectionString)
+	db, err := sqlx.Open("pgx", connectionString)
 	if err != nil {
 		return nil, err
 	}

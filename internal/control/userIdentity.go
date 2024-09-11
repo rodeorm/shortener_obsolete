@@ -7,7 +7,7 @@ import (
 	cookie "github.com/rodeorm/shortener/internal/control/cookie"
 )
 
-//GetUserIdentity определяет по кукам какой пользователь авторизовался, если куки некорректные, то создает новые
+// GetUserIdentity определяет по кукам какой пользователь авторизовался, если куки некорректные, то создает новые
 func (h DecoratedHandler) GetUserIdentity(w http.ResponseWriter, r *http.Request) (http.ResponseWriter, string) {
 	userKey, err := cookie.GetUserKeyFromCoockie(r)
 

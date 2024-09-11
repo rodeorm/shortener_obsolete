@@ -3,7 +3,7 @@ package control
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	repo "github.com/rodeorm/shortener/internal/repo"
@@ -13,7 +13,7 @@ func (h DecoratedHandler) APIShortenBatch(w http.ResponseWriter, r *http.Request
 	w, userKey := h.GetUserIdentity(w, r)
 	var urlReq []repo.URLWithCorrelationRequest
 	var urlRes []repo.URLWithCorrelationResponse
-	bodyBytes, _ := ioutil.ReadAll(r.Body)
+	bodyBytes, _ := io.ReadAll(r.Body)
 	err := json.Unmarshal(bodyBytes, &urlReq)
 
 	if err != nil {
